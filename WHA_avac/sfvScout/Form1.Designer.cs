@@ -49,7 +49,7 @@
             this.loginB.Name = "loginB";
             this.loginB.Size = new System.Drawing.Size(63, 32);
             this.loginB.TabIndex = 1;
-            this.loginB.Text = "强制登陆";
+            this.loginB.Text = "forceLogin";
             this.loginB.UseVisualStyleBackColor = true;
             this.loginB.Click += new System.EventHandler(this.loginB_Click);
             // 
@@ -59,7 +59,7 @@
             this.autoB.Name = "autoB";
             this.autoB.Size = new System.Drawing.Size(229, 32);
             this.autoB.TabIndex = 0;
-            this.autoB.Text = "开始探测";
+            this.autoB.Text = "start";
             this.autoB.UseVisualStyleBackColor = true;
             this.autoB.Click += new System.EventHandler(this.autoB_Click);
             // 
@@ -70,7 +70,7 @@
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(59, 12);
             this.label1.TabIndex = 3;
-            this.label1.Text = "刷新频率:";
+            this.label1.Text = "rate:";
             // 
             // rate
             // 
@@ -98,7 +98,7 @@
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(53, 12);
             this.label3.TabIndex = 8;
-            this.label3.Text = "for 月姐";
+            this.label3.Text = "for muyue";
             // 
             // logT
             // 
@@ -117,7 +117,7 @@
             this.addB.Name = "addB";
             this.addB.Size = new System.Drawing.Size(70, 23);
             this.addB.TabIndex = 11;
-            this.addB.Text = "添加";
+            this.addB.Text = "add";
             this.addB.UseVisualStyleBackColor = true;
             this.addB.Click += new System.EventHandler(this.addB_Click);
             // 
@@ -127,7 +127,7 @@
             this.deleteB.Name = "deleteB";
             this.deleteB.Size = new System.Drawing.Size(63, 23);
             this.deleteB.TabIndex = 12;
-            this.deleteB.Text = "删除";
+            this.deleteB.Text = "delete";
             this.deleteB.UseVisualStyleBackColor = true;
             this.deleteB.Click += new System.EventHandler(this.deleteB_Click);
             // 
