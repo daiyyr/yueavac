@@ -47,24 +47,26 @@
             this.button1 = new System.Windows.Forms.Button();
             this.label6 = new System.Windows.Forms.Label();
             this.label7 = new System.Windows.Forms.Label();
+            this.button2 = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
             // 
             // loginB
             // 
-            this.loginB.Location = new System.Drawing.Point(431, 12);
+            this.loginB.Location = new System.Drawing.Point(619, 12);
             this.loginB.Name = "loginB";
             this.loginB.Size = new System.Drawing.Size(63, 32);
             this.loginB.TabIndex = 1;
             this.loginB.Text = "forceLogin";
             this.loginB.UseVisualStyleBackColor = true;
+            this.loginB.Visible = false;
             this.loginB.Click += new System.EventHandler(this.loginB_Click);
             // 
             // autoB
             // 
             this.autoB.Location = new System.Drawing.Point(196, 12);
             this.autoB.Name = "autoB";
-            this.autoB.Size = new System.Drawing.Size(229, 32);
+            this.autoB.Size = new System.Drawing.Size(298, 32);
             this.autoB.TabIndex = 0;
             this.autoB.Text = "start";
             this.autoB.UseVisualStyleBackColor = true;
@@ -81,7 +83,7 @@
             // 
             // rate
             // 
-            this.rate.Location = new System.Drawing.Point(67, 23);
+            this.rate.Location = new System.Drawing.Point(51, 23);
             this.rate.Name = "rate";
             this.rate.Size = new System.Drawing.Size(68, 21);
             this.rate.TabIndex = 4;
@@ -91,7 +93,7 @@
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(141, 30);
+            this.label2.Location = new System.Drawing.Point(125, 28);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(17, 12);
             this.label2.TabIndex = 5;
@@ -101,73 +103,78 @@
             // 
             this.label3.AutoSize = true;
             this.label3.Font = new System.Drawing.Font("宋体", 9F);
-            this.label3.Location = new System.Drawing.Point(441, 362);
+            this.label3.Location = new System.Drawing.Point(194, 387);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(59, 12);
+            this.label3.Size = new System.Drawing.Size(125, 12);
             this.label3.TabIndex = 8;
-            this.label3.Text = "for muyue";
+            this.label3.Text = "Copyright @ Mushroom";
             // 
             // logT
             // 
-            this.logT.Location = new System.Drawing.Point(588, 12);
+            this.logT.Location = new System.Drawing.Point(14, 50);
             this.logT.Name = "logT";
             this.logT.ReadOnly = true;
             this.logT.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.ForcedVertical;
-            this.logT.Size = new System.Drawing.Size(331, 338);
+            this.logT.Size = new System.Drawing.Size(483, 175);
             this.logT.TabIndex = 9;
             this.logT.Text = "";
             this.logT.TextChanged += new System.EventHandler(this.logT_TextChanged);
             // 
             // addB
             // 
-            this.addB.Location = new System.Drawing.Point(355, 77);
+            this.addB.Location = new System.Drawing.Point(1040, 11);
             this.addB.Name = "addB";
             this.addB.Size = new System.Drawing.Size(70, 23);
             this.addB.TabIndex = 11;
             this.addB.Text = "add";
             this.addB.UseVisualStyleBackColor = true;
+            this.addB.Visible = false;
             this.addB.Click += new System.EventHandler(this.addB_Click);
             // 
             // deleteB
             // 
-            this.deleteB.Location = new System.Drawing.Point(431, 77);
+            this.deleteB.Location = new System.Drawing.Point(1116, 11);
             this.deleteB.Name = "deleteB";
             this.deleteB.Size = new System.Drawing.Size(63, 23);
             this.deleteB.TabIndex = 12;
             this.deleteB.Text = "delete";
             this.deleteB.UseVisualStyleBackColor = true;
+            this.deleteB.Visible = false;
             this.deleteB.Click += new System.EventHandler(this.deleteB_Click);
             // 
             // inputT
             // 
-            this.inputT.Location = new System.Drawing.Point(67, 50);
+            this.inputT.Location = new System.Drawing.Point(752, 13);
             this.inputT.Name = "inputT";
-            this.inputT.Size = new System.Drawing.Size(427, 21);
+            this.inputT.Size = new System.Drawing.Size(265, 21);
             this.inputT.TabIndex = 13;
+            this.inputT.Visible = false;
             // 
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(12, 53);
+            this.label4.Location = new System.Drawing.Point(697, 16);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(29, 12);
             this.label4.TabIndex = 14;
             this.label4.Text = "url:";
+            this.label4.Visible = false;
             // 
             // urlList
             // 
             this.urlList.FormattingEnabled = true;
-            this.urlList.Location = new System.Drawing.Point(14, 106);
+            this.urlList.Location = new System.Drawing.Point(699, 40);
             this.urlList.Name = "urlList";
-            this.urlList.Size = new System.Drawing.Size(480, 52);
+            this.urlList.Size = new System.Drawing.Size(318, 52);
             this.urlList.TabIndex = 15;
+            this.urlList.Visible = false;
             // 
             // testLog
             // 
-            this.testLog.Location = new System.Drawing.Point(14, 392);
+            this.testLog.Location = new System.Drawing.Point(699, 114);
             this.testLog.Name = "testLog";
             this.testLog.ReadOnly = true;
-            this.testLog.Size = new System.Drawing.Size(905, 316);
+            this.testLog.Size = new System.Drawing.Size(557, 316);
             this.testLog.TabIndex = 16;
             this.testLog.Text = "";
             // 
@@ -200,9 +207,9 @@
             // 
             this.button1.Location = new System.Drawing.Point(380, 327);
             this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(115, 23);
+            this.button1.Size = new System.Drawing.Size(114, 23);
             this.button1.TabIndex = 20;
-            this.button1.Text = "停止，重输验证码";
+            this.button1.Text = "重输验证码";
             this.button1.UseVisualStyleBackColor = true;
             this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
@@ -227,11 +234,23 @@
             this.label7.TabIndex = 22;
             this.label7.Text = "若输入有误请点击下面的按钮";
             // 
+            // button2
+            // 
+            this.button2.Location = new System.Drawing.Point(1039, 40);
+            this.button2.Name = "button2";
+            this.button2.Size = new System.Drawing.Size(140, 52);
+            this.button2.TabIndex = 23;
+            this.button2.Text = "test";
+            this.button2.UseVisualStyleBackColor = true;
+            this.button2.Visible = false;
+            this.button2.Click += new System.EventHandler(this.button2_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(931, 730);
+            this.ClientSize = new System.Drawing.Size(513, 415);
+            this.Controls.Add(this.button2);
             this.Controls.Add(this.label7);
             this.Controls.Add(this.label6);
             this.Controls.Add(this.button1);
@@ -252,7 +271,7 @@
             this.Controls.Add(this.autoB);
             this.Controls.Add(this.loginB);
             this.Name = "Form1";
-            this.Text = "WHA_avac";
+            this.Text = "avac单用户版";
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -280,6 +299,7 @@
         private System.Windows.Forms.Button button1;
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.Label label7;
+        private System.Windows.Forms.Button button2;
     }
 }
 

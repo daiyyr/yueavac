@@ -24,6 +24,7 @@ namespace WHA_avac
         string gViewStateGenerator = "";
         string gEventvalidation = "";
         string gVerificationCode = "";
+        int gTicket = 1;
 
         CookieCollection gCookieContainer = null;
         
@@ -144,6 +145,7 @@ namespace WHA_avac
         public Form1()
         {
             InitializeComponent();
+            
             gEmail = gEmail.Replace("@","%40");
             if (File.Exists(System.Environment.CurrentDirectory + "\\" + "urlList"))
             {
@@ -190,20 +192,28 @@ namespace WHA_avac
             sw.Write(content);
             sw.Close();
         }
-        /*
-        public int downloadHtml(string url, string html)
+        
+        public int downloadHtml(string html)
         {
-            string lastSection = "";
-            string P = @"(?<=\/)[^\/]+?(?=$|\/$|\?)";
-            Match found = (new Regex(P)).Match(url);
-            if (found.Success)
+            string fileName = System.Environment.CurrentDirectory + "\\" +
+                gFname + gLastName + System.DateTime.Now.ToString("yyyyMMddHHmmss", DateTimeFormatInfo.InvariantInfo);
+            string fileFullName = fileName + ".txt";
+            int i = 2;
+            while (true)
             {
-                lastSection = found.Groups[0].Value;
+                if (File.Exists(fileFullName))
+                {
+                    fileFullName = fileName + "_" + i.ToString();
+                    i++;
+                    continue;
+                }
+                break;
             }
-            string fileName = lastSection + System.DateTime.Now.ToString("yyyyMMddHHmmss", DateTimeFormatInfo.InvariantInfo) + ".txt";
-            writeFile(System.Environment.CurrentDirectory + "\\" + fileName, "URL:" + url + Environment.NewLine + "HTML:" + Environment.NewLine + html);
+            
+            writeFile(fileFullName, html);
             return 1;
         }
+        /*
         public int HtmlHandler(HttpWebResponse resp)
         {            
             string url = resp.ResponseUri.ToString();
@@ -332,7 +342,8 @@ namespace WHA_avac
             //req.Accept = "*/*";
             //req.Connection = "keep-alive";
             req.KeepAlive = true;
-            req.UserAgent = "Mozilla/5.0 (Windows NT 6.3; WOW64; rv:37.0) Gecko/20100101 Firefox/37.0";
+            req.UserAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.10; rv:40.0) Gecko/20100101 Firefox/40.0";
+            //req.UserAgent = "Mozilla/5.0 (Windows NT 6.3; WOW64; rv:37.0) Gecko/20100101 Firefox/37.0";
             //req.UserAgent = "Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 6.1; WOW64; Trident/4.0; SLCC2; .NET CLR 2.0.50727; .NET CLR 3.5.30729; .NET CLR 3.0.30729; Media Center PC 6.0; InfoPath.3; .NET4.0C; .NET4.0E";
             req.Headers["Accept-Encoding"] = "gzip, deflate";
             req.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
@@ -589,14 +600,33 @@ namespace WHA_avac
             gViewstate = ToUrlEncode(gViewstate);
 
             setLogT("make a pointment..");
-            weLoveMuYue(
+            respHtml = weLoveYue(
                 "https://www.visaservices.org.in/DIAC-China-Appointment/AppScheduling/AppWelcome.aspx?p=Gta39GFZnstZVCxNVy83zTlkvzrXE95fkjmft28XjNg%3d",
                 "POST",
                 "https://www.visaservices.org.in/DIAC-China-Appointment/AppScheduling/AppWelcome.aspx?p=Gta39GFZnstZVCxNVy83zTlkvzrXE95fkjmft28XjNg%3d",
                 false,
                 "__EVENTTARGET=ctl00%24plhMain%24lnkSchApp&__EVENTARGUMENT=&__VIEWSTATE="+ gViewstate
-                +"&____Ticket=1&__EVENTVALIDATION="+gEventvalidation
+                +"&____Ticket="+gTicket.ToString()
+                +"&__EVENTVALIDATION="+gEventvalidation
                 );
+            gTicket++;
+
+            reg = @"(?<=name=""__EVENTVALIDATION"" id=""__EVENTVALIDATION"" value="").*?(?="" />)";
+            myMatch = (new Regex(reg)).Match(respHtml);
+            if (myMatch.Success)
+            {
+                gEventvalidation = myMatch.Groups[0].Value;
+            }
+            gEventvalidation = ToUrlEncode(gEventvalidation);
+
+            reg = @"(?<=id=""__VIEWSTATE"" value="").*?(?="" />)";
+            myMatch = (new Regex(reg)).Match(respHtml);
+            if (myMatch.Success)
+            {
+                gViewstate = myMatch.Groups[0].Value;
+
+            }
+            gViewstate = ToUrlEncode(gViewstate);
 
             return 1;
         }
@@ -619,10 +649,12 @@ namespace WHA_avac
                 + "VAC=" + gVACity
                 + "&ctl00%24plhMain%24btnSubmit=%E6%8F%90%E4%BA%A4&ctl00%24plhMain%24hdnValidation1"
                 + "=%E8%AF%B7%E9%80%89%E6%8B%A9%EF%BC%9A&ctl00%24plhMain%24hdnValidation2=%E7%AD%BE%E8%AF%81%E7%94%B3%E8"
-                + "%AF%B7%E4%B8%AD%E5%BF%83&ctl00%24plhMain%24hdnValidation3=%E5%B1%85%E4%BD%8F%E5%9B%BD&____Ticket=2&__EVENTVALIDATION"
+                + "%AF%B7%E4%B8%AD%E5%BF%83&ctl00%24plhMain%24hdnValidation3=%E5%B1%85%E4%BD%8F%E5%9B%BD&____Ticket="+gTicket.ToString()
+                +"&__EVENTVALIDATION"
                 + "=Vl39F6qwZOICJpTa9PcH0gV%2FyeRGOfg5uQqROs1LRKtDZsxgCLg9LzkK%2F0bKajvKLYu88iUHiiiQQjV%2FynffMgplscVinn0GMf5vgACt66c"
                 + "%3D"
                 );
+            gTicket++;
 
             reg = @"(?<=name=""__EVENTVALIDATION"" id=""__EVENTVALIDATION"" value="").*?(?="" />)";
             myMatch = (new Regex(reg)).Match(respHtml);
@@ -646,9 +678,48 @@ namespace WHA_avac
 
         public int selectVisaType()
         {
-            setLogT("select visa type..");
+            string respHtml;
 
-            string respHtml = weLoveYue(
+            /*
+            setLogT("select the visa type..");
+            //neccessary?
+            respHtml = weLoveYue(
+                "https://www.visaservices.org.in/DIAC-China-Appointment/AppScheduling/AppSchedulingGetInfo.aspx",
+                "POST",
+                "https://www.visaservices.org.in/DIAC-China-Appointment/AppScheduling/AppSchedulingGetInfo.aspx",
+                false,
+                "__EVENTTARGET=ctl00%24plhMain%24cboVisaCategory&__EVENTARGUMENT=&__LASTFOCUS=&__VIEWSTATE=" + gViewstate
+                + "&ctl00%24plhMain%24tbxNumOfApplicants=1&ctl00%24plhMain%24cboVisaCategory=" + gCategory //13 for general, 17 for working and holiday
+                + "&ctl00%24plhMain%24hdnValidation1=%E8%AF%B7%E8%BE%93%E5%85%A5%EF%BC%9A&ctl00%24plhMain%24hdnValidation2=%E6%9C%89%E6%95%88%E4%BA%BA%E6"
+                +"%95%B0%E3%80%82&ctl00%24plhMain%24hdnValidation3=%E6%8A%A5%E5%90%8D%E4%BA%BA%E6%95%B0%E5%BF%85%E9%A1"
+                +"%BB%E4%BB%8B%E4%BA%8E1%E5%92%8C++&ctl00%24plhMain%24hdnValidation4=%E7%AD%BE%E8%AF%81%E7%B1%BB%E5%88%AB"
+                + "&____Ticket="+gTicket.ToString()
+                + "&__EVENTVALIDATION=" + gEventvalidation
+                );
+            gTicket++;
+
+            reg = @"(?<=name=""__EVENTVALIDATION"" id=""__EVENTVALIDATION"" value="").*?(?="" />)";
+            myMatch = (new Regex(reg)).Match(respHtml);
+            if (myMatch.Success)
+            {
+                gEventvalidation = myMatch.Groups[0].Value;
+
+            }
+            gEventvalidation = ToUrlEncode(gEventvalidation);
+
+            reg = @"(?<=id=""__VIEWSTATE"" value="").*?(?="" />)";
+            myMatch = (new Regex(reg)).Match(respHtml);
+            if (myMatch.Success)
+            {
+                gViewstate = myMatch.Groups[0].Value;
+
+            }
+            gViewstate = ToUrlEncode(gViewstate);
+            */
+
+
+            setLogT("submit the visa type..");
+            respHtml = weLoveYue(
                 "https://www.visaservices.org.in/DIAC-China-Appointment/AppScheduling/AppSchedulingGetInfo.aspx",
                 "POST",
                 "https://www.visaservices.org.in/DIAC-China-Appointment/AppScheduling/AppSchedulingGetInfo.aspx",
@@ -660,8 +731,10 @@ namespace WHA_avac
                 +"%24hdnValidation1=%E8%AF%B7%E8%BE%93%E5%85%A5%EF%BC%9A&ctl00%24plhMain%24hdnValidation2=%E6%9C%89%E6"
                 +"%95%88%E4%BA%BA%E6%95%B0%E3%80%82&ctl00%24plhMain%24hdnValidation3=%E6%8A%A5%E5%90%8D%E4%BA%BA%E6%95"
                 +"%B0%E5%BF%85%E9%A1%BB%E4%BB%8B%E4%BA%8E1%E5%92%8C++&ctl00%24plhMain%24hdnValidation4=%E7%AD%BE%E8%AF"
-                + "%81%E7%B1%BB%E5%88%AB&____Ticket=8&__EVENTVALIDATION=" + gEventvalidation
+                +"%81%E7%B1%BB%E5%88%AB&____Ticket="+gTicket.ToString()
+                +"&__EVENTVALIDATION=" + gEventvalidation
                 );
+            gTicket++;
 
             reg = @"(?<=name=""__EVENTVALIDATION"" id=""__EVENTVALIDATION"" value="").*?(?="" />)";
             myMatch = (new Regex(reg)).Match(respHtml);
@@ -687,10 +760,26 @@ namespace WHA_avac
             if (myMatch.Success)
             {
                 cCodeGuid = myMatch.Groups[0].Value;
-                
             }
-            pictureBox1.ImageLocation = @"https://www.visaservices.org.in/DIAC-China-Appointment/AppScheduling/MyCaptchaImage.aspx?guid="+cCodeGuid;
-            
+
+            if (textBox1.InvokeRequired)
+            {
+                delegate2 sl = new delegate2(delegate()
+                {
+                    pictureBox1.ImageLocation = @"https://www.visaservices.org.in/DIAC-China-Appointment/AppScheduling/MyCaptchaImage.aspx?guid=" + cCodeGuid;
+                    textBox1.Text = "";
+                    textBox1.ReadOnly = false;
+                    label6.Visible = true;
+                });
+                textBox1.Invoke(sl);
+            }
+            else
+            {
+                pictureBox1.ImageLocation = @"https://www.visaservices.org.in/DIAC-China-Appointment/AppScheduling/MyCaptchaImage.aspx?guid=" + cCodeGuid;
+                textBox1.Text = "";
+                textBox1.ReadOnly = false;
+                label6.Visible = true;
+            }
 
             return 1;
         }
@@ -739,23 +828,17 @@ namespace WHA_avac
                 + "%B3%E8%AF%B7%E4%BA%BA%E6%B2%A1%E6%9C%89%E3%80%82&ctl00%24plhMain%24hdnValidation8=%E8%AF%B7%E5%AF%B9"
                 + "%E7%94%B3%E8%AF%B7%E4%BA%BA%E6%B2%A1%E6%9C%89%E8%BE%93%E5%85%A5%E6%9C%89%E6%95%88%E7%9A%84GWFNo%E7%9A"
                 + "%84%E3%80%82&ctl00%24plhMain%24hdnValidation9=%E8%AF%B7%E9%80%89%E6%8B%A9%E7%AD%BE%E8%AF%81%E7%B1%BB"
-                + "%E5%88%AB%E7%9A%84%E7%94%B3%E8%AF%B7%E4%BA%BA%E6%B2%A1%E6%9C%89%E3%80%82&____Ticket=5"
+                + "%E5%88%AB%E7%9A%84%E7%94%B3%E8%AF%B7%E4%BA%BA%E6%B2%A1%E6%9C%89%E3%80%82&____Ticket="+gTicket.ToString()
                 + "&__EVENTVALIDATION=" + gEventvalidation
                 + "&ctl00%24plhMain%24mycaptchacontrol1=" + gVerificationCode
                 );
-
-            if (respHtml.Contains("Applicant Details") && respHtml.Contains("Please enter"))
-            {
-                setLogT("incompleted personal details");
-                return -1;
-            }
+            gTicket++;
 
             reg = @"(?<=name=""__EVENTVALIDATION"" id=""__EVENTVALIDATION"" value="").*?(?="" />)";
             myMatch = (new Regex(reg)).Match(respHtml);
             if (myMatch.Success)
             {
                 gEventvalidation = myMatch.Groups[0].Value;
-                
             }
             gEventvalidation = ToUrlEncode(gEventvalidation);
 
@@ -764,16 +847,77 @@ namespace WHA_avac
             if (myMatch.Success)
             {
                 gViewstate = myMatch.Groups[0].Value;
-                
+
             }
             gViewstate = ToUrlEncode(gViewstate);
+
+            if (respHtml.Contains("correct CAPTCHA alphabets"))
+            {
+                setLogT("验证码错误！请重新输入");
+                string cCodeGuid = "";
+                reg = @"(?<=MyCaptchaImage.aspx\?guid=).*?(?="" border=)";
+                myMatch = (new Regex(reg)).Match(respHtml);
+                if (myMatch.Success)
+                {
+                    cCodeGuid = myMatch.Groups[0].Value;
+                }
+                pictureBox1.ImageLocation = @"https://www.visaservices.org.in/DIAC-China-Appointment/AppScheduling/MyCaptchaImage.aspx?guid=" + cCodeGuid;
+            
+                return -2;
+            }
+
+            if (respHtml.Contains("Applicant Details") && respHtml.Contains("Please enter"))
+            {
+                setLogT("incompleted personal details");
+                return -1;
+            }
+
+
+            string dateDay="";
+            string dateMonth="";
+            int dateYear = 2015;
+
+            //find a latest day
+            for (int i = 31; i > 0; i--)
+            {
+                //September 25">25</a></td><td align
+                reg = i.ToString()+@""">"+i.ToString()+@"</a></td><td align";
+                myMatch = (new Regex(reg)).Match(respHtml);
+                if (myMatch.Success)
+                {
+                    dateDay = i.ToString();
+                    break;
+                }
+            }
+
+            //find the month
+            reg = @"(?<=style=""color:Black"" title="").*?(?= \d+"")";
+            myMatch = (new Regex(reg)).Match(respHtml);
+            if (myMatch.Success)
+            {
+                dateMonth = myMatch.Groups[0].Value;
+            }
+
+            //find the year
+            DateTimeFormatInfo dtFormat = new DateTimeFormatInfo();
+            dtFormat.ShortDatePattern = "yyyyMMMMd";
+            while (true)
+            {
+                DateTime dt = Convert.ToDateTime(dateYear.ToString() + dateMonth + dateDay, dtFormat);
+                if ((dt - DateTime.Now).Days > 0)
+                {
+                    gDays = (dt - Convert.ToDateTime("2000-01-01 00:00:00")).Days.ToString();
+                    break;
+                }
+                dateYear++;
+            }
 
             return 1;
         }
 
         public int pickDate()
         {
-            setLogT("post pickDate..");
+            setLogT("pickDate..");
 
             string respHtml = weLoveYue(
                 "https://www.visaservices.org.in/DIAC-China-Appointment/AppScheduling/AppSchedulingInterviewDate.aspx",
@@ -783,8 +927,10 @@ namespace WHA_avac
                 "__EVENTTARGET=ctl00%24plhMain%24cldAppointment&__EVENTARGUMENT="
                 + gDays
                 + "&__VIEWSTATE=" + gViewstate
-                +"&____Ticket=6&__EVENTVALIDATION=" +gEventvalidation
+                +"&____Ticket="+gTicket.ToString()
+                +"&__EVENTVALIDATION=" +gEventvalidation
                 );
+            gTicket++;
 
             reg = @"(?<=name=""__EVENTVALIDATION"" id=""__EVENTVALIDATION"" value="").*?(?="" />)";
             myMatch = (new Regex(reg)).Match(respHtml);
@@ -818,8 +964,12 @@ namespace WHA_avac
                 false,
                 "__EVENTTARGET=ctl00%24plhMain%24gvSlot%24ctl" + gTime
                 +"%24lnkTimeSlot&__EVENTARGUMENT=&__VIEWSTATE=" + gViewstate
-            +"&____Ticket=7&__EVENTVALIDATION="+ gEventvalidation
+            +"&____Ticket="+gTicket.ToString()
+            +"&__EVENTVALIDATION="+ gEventvalidation
             );
+            gTicket++;
+
+            downloadHtml(respHtml);
 
             return 1;
         }
@@ -882,7 +1032,22 @@ namespace WHA_avac
  }
  */
         public void autoT() {
-            //create();
+            if (textBox1.InvokeRequired)
+            {
+                delegate2 sl = new delegate2(delegate()
+                {
+                    textBox1.ReadOnly = true;
+                    label6.Visible = false;
+                });
+                textBox1.Invoke(sl);
+            }
+            else
+            {
+                textBox1.ReadOnly = true;
+                label6.Visible = false;
+            }
+
+            create();
             selectLocation();
             selectVisaType();
             
@@ -901,9 +1066,30 @@ namespace WHA_avac
         }
 
         public void autoT2() {
-            fillInDetails();
+            if (fillInDetails() == -2)//incorrect vervification code
+            {
+                if (textBox1.InvokeRequired)
+                {
+                    delegate2 sl = new delegate2(delegate()
+                    {
+                        textBox1.Text = "";
+                        textBox1.ReadOnly = false;
+                        label6.Visible = true;
+                    });
+                    textBox1.Invoke(sl);
+                }
+                else
+                {
+                    textBox1.Text = "";
+                    textBox1.ReadOnly = false;
+                    label6.Visible = true;
+                }
+                return;
+            }
+
             pickDate();
             pickTime();
+            
         }
             
 
@@ -1024,7 +1210,6 @@ namespace WHA_avac
         {
             if (textBox1.Text.Length == 5)
             {
-                autoT2();
                 if (textBox1.InvokeRequired)
                 {
                     delegate2 sl = new delegate2(delegate()
@@ -1039,6 +1224,10 @@ namespace WHA_avac
                     textBox1.ReadOnly = true;
                     label6.Visible = false;
                 }
+
+                gVerificationCode = textBox1.Text;
+                autoT2();
+                
             }
         }
 
@@ -1061,10 +1250,47 @@ namespace WHA_avac
                 label6.Visible = true;
             }
         }
+        
+        //for test
+        private void button2_Click(object sender, EventArgs e)
+        {
+            //test TimeSpan
+            DateTime dt1 = Convert.ToDateTime("1996-01-01 00:00:00");
+            DateTime dt20000101 = Convert.ToDateTime("1997-01-01 00:00:00");
+            setLogT((dt1-dt20000101).Days.ToString());
+            int dd = (dt1 - dt20000101).Days;
+
+            //正则表达式有另一条规则，比懒惰／贪婪规则的优先级更高：最先开始的匹配拥有最高的优先权
+            reg = @"(?<=a).*?(?=b)";
+            myMatch = (new Regex(reg)).Match("aaaaaaaaaaa333b");
+            if (myMatch.Success)
+            {
+                setLogT( myMatch.Groups[0].Value);
+            }
+
+            //test string 2 DateTime
+
+            int year = 2015;
+            string strDt = year.ToString() + "April25";
+            DateTimeFormatInfo dtFormat = new DateTimeFormatInfo();
+            dtFormat.ShortDatePattern = "yyyyMMMMd";
+            DateTime dt = Convert.ToDateTime(strDt, dtFormat);
+            setLogT(dt.ToString());
+
+            reg = @"(?<=style=""color:Black"" title="").*?(?= \d+"")";
+            myMatch = (new Regex(reg)).Match("ent','5750')\" style=\"color:Black\" title=\"September 29\">29</a></td><td align=\"center\" ");
+            if (myMatch.Success)
+            {
+                setLogT( myMatch.Groups[0].Value);
+            }
+        }
     }
 }
 
-//详情页提交仍然出现详情页，什么问题？
-//日期选择，从31遍历到1，找到能点的date，直接post
-//YANZHENGMA ERROR TISHI
+//提交日期不成功
+//选择类别时，是否不需要提交两次
+//验证码第一次错后，一直cuo
+//直接post a inavailible date, could succeed?
 //下载PDF
+//确定不需要访问第一页？
+//验证码窗口自动获取焦点
