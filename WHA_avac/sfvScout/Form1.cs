@@ -16,36 +16,38 @@ namespace WHA_avac
 {
     public partial class Form1 : Form
     {
+
+        bool debug = true;
+
         string reg = "";
         Match myMatch;
-        Thread gAlarm = null;
-        string gnrnodeGUID = "";
+ 
         string gViewstate = "";
-        string gViewStateGenerator = "";
         string gEventvalidation = "";
         string gVerificationCode = "";
         int gTicket = 1;
 
         CookieCollection gCookieContainer = null;
-        
 
 
-        string gVACity = "30",     //  30 for guangzhou;29 for shanghai;28 for beijing
-               gCategory = "13",          //13 for general, 17 for working and holiday
+
+        string gVACity_raw = "beijing",     //  30 for guangzhou;29 for shanghai;28 for beijing
+               gVACity = "",
+               gCategory = "from combobox",          //13 for general, 17 for work and holiday
                gTitle = "MR.",
                gContactNumber = "05923333433",
-               gEmail = "33333@qq.com",//replace @ with %40 
-               gFname = "ZHANG",
-               gLastName = "XIAOMING",
-               gMobile = "13900000000",
-               gPassport = "E55555555",
-               gSTDCode = "0533",
-               gDays = "5721",           //5721 means 2015.08.31, the number of days since 2000.01.01
-                                         //该值只作参考，默认选择最晚时间
+               gEmail = "3fe3333@qq.com",
+               gFirstName = "jinping",
+               gLastName = "xi",
+               gMobile = "139034000",
+               gPassport = "E7743779483",
+               gSTDCode = "0533";
+        List<String> gDays = new List<string>(); //5721 means 2015.08.31, the number of days since 2000.01.01
+                                                 //默认选择最晚日期
 
-               gTime = "04"      //02~21, 与时间的对应关系如下
-               ;
-                                /**  gTime
+        string gTime = "02";    //02~24, 15分钟一个时段，某个时段满了则后面的时段号均-1
+                                //例如
+                                /**
                                  *  0730 02
                                     0800 03
                                     0845 04
@@ -68,8 +70,12 @@ namespace WHA_avac
                                     1400 21
                                  **/
 
-        string user = "dudeea";
-        string password = "Dd123456";
+
+ //       Thread gAlarm = null;
+ //       string gnrnodeGUID = "";
+ //       string gViewStateGenerator = "";
+  //      string user = "dudeea";
+  //      string password = "Dd123456";
 
 
         public delegate void setLog(string str1);
@@ -145,7 +151,28 @@ namespace WHA_avac
         public Form1()
         {
             InitializeComponent();
+
+            if (debug)
+            {
+                comboBox1.SelectedIndex = 1; //normal
+                button2.Visible = true;
+                testLog.Visible = true;
+            }
+            else {
+                comboBox1.SelectedIndex = 0; //work and holiday 
+            }
             
+
+            if (gVACity_raw.Equals("guangzhou"))
+            {
+                gVACity = "30";
+            }
+            else if (gVACity_raw.Equals("shanghai"))
+            {
+                gVACity = "29";
+            }else{
+                gVACity = "28";
+            }
             gEmail = gEmail.Replace("@","%40");
             if (File.Exists(System.Environment.CurrentDirectory + "\\" + "urlList"))
             {
@@ -196,8 +223,8 @@ namespace WHA_avac
         public int downloadHtml(string html)
         {
             string fileName = System.Environment.CurrentDirectory + "\\" +
-                gFname + gLastName + System.DateTime.Now.ToString("yyyyMMddHHmmss", DateTimeFormatInfo.InvariantInfo);
-            string fileFullName = fileName + ".txt";
+                gLastName + gFirstName + System.DateTime.Now.ToString("yyyyMMddHHmmss", DateTimeFormatInfo.InvariantInfo);
+            string fileFullName = fileName + ".html";
             int i = 2;
             while (true)
             {
@@ -473,7 +500,7 @@ namespace WHA_avac
         }
 
         /* 
-         * return responsive HTML
+         * return response HTML
          */
         public string weLoveYue(string url, string method, string referer, bool allowAutoRedirect, string postData)
         {
@@ -514,7 +541,10 @@ namespace WHA_avac
                         continue;
                     }
                     gCookieContainer = req.CookieContainer.GetCookies(req.RequestUri);
-                    setTestLog(req, respHtml);
+                    if (debug)
+                    {
+                        setTestLog(req, respHtml);
+                    }
                     resp.Close();
                     return respHtml;
                 }
@@ -573,9 +603,12 @@ namespace WHA_avac
 
         public int create() 
         {
-            setLogT("start..");
+            string respHtml;
 
-            string respHtml = weLoveYue(
+            
+            setLogT("get first page..");
+
+            respHtml = weLoveYue(
                 "https://www.visaservices.org.in/DIAC-China-Appointment/AppScheduling/AppWelcome.aspx?p=Gta39GFZnstZVCxNVy83zTlkvzrXE95fkjmft28XjNg%3d",
                 "GET",
                 "",
@@ -598,6 +631,8 @@ namespace WHA_avac
 
             }
             gViewstate = ToUrlEncode(gViewstate);
+            
+
 
             setLogT("make a pointment..");
             respHtml = weLoveYue(
@@ -634,7 +669,7 @@ namespace WHA_avac
 
         public int selectLocation()
         {
-            setLogT("select Location..");
+            setLogT("selecting Location: " + gVACity_raw);
 
             string respHtml = weLoveYue(
                 "https://www.visaservices.org.in/DIAC-China-Appointment/AppScheduling/AppScheduling.aspx",
@@ -679,8 +714,8 @@ namespace WHA_avac
         public int selectVisaType()
         {
             string respHtml;
-
             /*
+            
             setLogT("select the visa type..");
             //neccessary?
             respHtml = weLoveYue(
@@ -715,10 +750,14 @@ namespace WHA_avac
 
             }
             gViewstate = ToUrlEncode(gViewstate);
+
             */
 
-
-            setLogT("submit the visa type..");
+            delegate2 s0 = new delegate2(delegate()
+            {
+                setLogT("submitting the visa type: " + comboBox1.SelectedItem.ToString());
+            });
+            textBox1.Invoke(s0);
             respHtml = weLoveYue(
                 "https://www.visaservices.org.in/DIAC-China-Appointment/AppScheduling/AppSchedulingGetInfo.aspx",
                 "POST",
@@ -735,6 +774,12 @@ namespace WHA_avac
                 +"&__EVENTVALIDATION=" + gEventvalidation
                 );
             gTicket++;
+
+            if (respHtml.Contains("No date(s) available for appointment.") || respHtml.Contains("无日期（S）委任。"))
+            {
+                setLogT("该类别名额已满，不要灰心，备战下一次");
+                return -9;
+            }
 
             reg = @"(?<=name=""__EVENTVALIDATION"" id=""__EVENTVALIDATION"" value="").*?(?="" />)";
             myMatch = (new Regex(reg)).Match(respHtml);
@@ -769,6 +814,7 @@ namespace WHA_avac
                     pictureBox1.ImageLocation = @"https://www.visaservices.org.in/DIAC-China-Appointment/AppScheduling/MyCaptchaImage.aspx?guid=" + cCodeGuid;
                     textBox1.Text = "";
                     textBox1.ReadOnly = false;
+                    textBox1.Focus();
                     label6.Visible = true;
                 });
                 textBox1.Invoke(sl);
@@ -778,6 +824,7 @@ namespace WHA_avac
                 pictureBox1.ImageLocation = @"https://www.visaservices.org.in/DIAC-China-Appointment/AppScheduling/MyCaptchaImage.aspx?guid=" + cCodeGuid;
                 textBox1.Text = "";
                 textBox1.ReadOnly = false;
+                textBox1.Focus();
                 label6.Visible = true;
             }
 
@@ -787,7 +834,7 @@ namespace WHA_avac
 
         public int fillInDetails()
         {
-            setLogT("details..");
+            setLogT("filling in details..");
 
             string respHtml = weLoveYue(
                 "https://www.visaservices.org.in/DIAC-China-Appointment/AppScheduling/AppSchedulingVisaCategory.aspx",
@@ -801,7 +848,7 @@ namespace WHA_avac
                 + "%24ctl01%24cboTitle="
                 + gTitle
                 + "&ctl00%24plhMain%24repAppVisaDetails%24ctl01%24tbxFName="
-                + gFname
+                + gFirstName
                 + "&ctl00%24plhMain"
                 + "%24repAppVisaDetails%24ctl01%24tbxLName="
                 + gLastName
@@ -866,21 +913,55 @@ namespace WHA_avac
                 return -2;
             }
 
+            if (respHtml.Contains("申请人已预约")||respHtml.Contains("Marked applicants already have an appointment.") )
+            {
+                setLogT("申请人已预约: " + gLastName +" "+ gFirstName +", 护照: " + gPassport);
+                return -3;
+            }
+
             if (respHtml.Contains("Applicant Details") && respHtml.Contains("Please enter"))
             {
                 setLogT("incompleted personal details");
                 return -1;
             }
 
+            reg = @"(?<=Appointment',')\d+?(?='\)"" style=""color:Black"" title="")";
+            myMatch = (new Regex(reg)).Match(respHtml);
+            while (myMatch.Success)
+            {
+                gDays.Add(myMatch.Groups[0].Value);
+                myMatch = myMatch.NextMatch();
+            }
+            if (gDays.Count==0)
+            {
+                setLogT(gVACity_raw + ", " + (gCategory.Equals("17") ? "working and holiday, " : "general") + ", 名额已满, 请尝试其它预约地点");
+                return -1;
+            }
 
+
+
+            //we do not need to calculate the TimeSpan, it's on the page
+            /*
             string dateDay="";
             string dateMonth="";
             int dateYear = 2015;
+            
+            //find the month
+            reg = @"(?<=style=""color:Black"" title="").*?(?= \d+"")";
+            myMatch = (new Regex(reg)).Match(respHtml);
+            if (myMatch.Success)
+            {
+                dateMonth = myMatch.Groups[0].Value;
+            }
+            else
+            {
+                setLogT("Error.. there is no available month");
+                return -1;
+            }
 
             //find a latest day
             for (int i = 31; i > 0; i--)
             {
-                //September 25">25</a></td><td align
                 reg = i.ToString()+@""">"+i.ToString()+@"</a></td><td align";
                 myMatch = (new Regex(reg)).Match(respHtml);
                 if (myMatch.Success)
@@ -889,13 +970,10 @@ namespace WHA_avac
                     break;
                 }
             }
-
-            //find the month
-            reg = @"(?<=style=""color:Black"" title="").*?(?= \d+"")";
-            myMatch = (new Regex(reg)).Match(respHtml);
-            if (myMatch.Success)
+            if (dateDay.Equals(""))
             {
-                dateMonth = myMatch.Groups[0].Value;
+                setLogT(gVACity_raw + ", " + (gCategory.Equals("17")?"working and holiday, ":"general") + ", 名额已满!");
+                return -1;
             }
 
             //find the year
@@ -906,51 +984,71 @@ namespace WHA_avac
                 DateTime dt = Convert.ToDateTime(dateYear.ToString() + dateMonth + dateDay, dtFormat);
                 if ((dt - DateTime.Now).Days > 0)
                 {
-                    gDays = (dt - Convert.ToDateTime("2000-01-01 00:00:00")).Days.ToString();
+                    gDays[1] = (dt - Convert.ToDateTime("2000-01-01 00:00:00")).Days.ToString();
                     break;
                 }
                 dateYear++;
             }
-
+             */
+ 
             return 1;
         }
 
         public int pickDate()
         {
-            setLogT("pickDate..");
-
-            string respHtml = weLoveYue(
-                "https://www.visaservices.org.in/DIAC-China-Appointment/AppScheduling/AppSchedulingInterviewDate.aspx",
-                "POST",
-                "https://www.visaservices.org.in/DIAC-China-Appointment/AppScheduling/AppSchedulingVisaCategory.aspx",
-                false,
-                "__EVENTTARGET=ctl00%24plhMain%24cldAppointment&__EVENTARGUMENT="
-                + gDays
-                + "&__VIEWSTATE=" + gViewstate
-                +"&____Ticket="+gTicket.ToString()
-                +"&__EVENTVALIDATION=" +gEventvalidation
-                );
-            gTicket++;
-
-            reg = @"(?<=name=""__EVENTVALIDATION"" id=""__EVENTVALIDATION"" value="").*?(?="" />)";
-            myMatch = (new Regex(reg)).Match(respHtml);
-            if (myMatch.Success)
+            while(true)
             {
-                gEventvalidation = myMatch.Groups[0].Value;
-                
-            }
-            gEventvalidation = ToUrlEncode(gEventvalidation);
+                setLogT("pickDate..");
 
-            reg = @"(?<=id=""__VIEWSTATE"" value="").*?(?="" />)";
-            myMatch = (new Regex(reg)).Match(respHtml);
-            if (myMatch.Success)
-            {
-                gViewstate = myMatch.Groups[0].Value;
-                
-            }
-            gViewstate = ToUrlEncode(gViewstate);
+                if (gDays.Count == 0)
+                {
+                    setLogT(gVACity_raw + ", " + (gCategory.Equals("17") ? "working and holiday, " : "general") + ", 名额已满, 请尝试其它预约地点");
+                    return -1;
+                }
 
-            return 1;
+                string respHtml = weLoveYue(
+                    "https://www.visaservices.org.in/DIAC-China-Appointment/AppScheduling/AppSchedulingInterviewDate.aspx",
+                    "POST",
+                    "https://www.visaservices.org.in/DIAC-China-Appointment/AppScheduling/AppSchedulingVisaCategory.aspx",
+                    false,
+                    "__EVENTTARGET=ctl00%24plhMain%24cldAppointment&__EVENTARGUMENT="
+                    + gDays.Last()
+                    + "&__VIEWSTATE=" + gViewstate
+                    + "&____Ticket=" + gTicket.ToString()
+                    + "&__EVENTVALIDATION=" + gEventvalidation
+                    );
+                gTicket++;
+
+                reg = @"style=""color:Black"" title="".*?"">\d+</a></td><td align=""center""";
+                myMatch = (new Regex(reg)).Match(respHtml);
+                if (myMatch.Success)
+                {
+                    setLogT("所选日期异常，选择前一个可用天");
+                    gDays.RemoveAt(gDays.Count - 1);
+                    continue;
+                }
+
+
+                reg = @"(?<=name=""__EVENTVALIDATION"" id=""__EVENTVALIDATION"" value="").*?(?="" />)";
+                myMatch = (new Regex(reg)).Match(respHtml);
+                if (myMatch.Success)
+                {
+                    gEventvalidation = myMatch.Groups[0].Value;
+
+                }
+                gEventvalidation = ToUrlEncode(gEventvalidation);
+
+                reg = @"(?<=id=""__VIEWSTATE"" value="").*?(?="" />)";
+                myMatch = (new Regex(reg)).Match(respHtml);
+                if (myMatch.Success)
+                {
+                    gViewstate = myMatch.Groups[0].Value;
+
+                }
+                gViewstate = ToUrlEncode(gViewstate);
+
+                return 1;
+            }
         }
 
         public int pickTime()
@@ -969,7 +1067,58 @@ namespace WHA_avac
             );
             gTicket++;
 
-            downloadHtml(respHtml);
+            string lblReference = "";
+            reg = @"(?<=<span id=""lblReference"">).*?(?=</span>)";
+            myMatch = (new Regex(reg)).Match(respHtml);
+            if (myMatch.Success)
+            {
+                lblReference = myMatch.Groups[0].Value;
+                setLogT("预约成功！预约号: "+lblReference+"\n确认信已下载到软件所在位置，请截图或拍照并请牢记预约号。");
+            }
+            else
+            {
+                setLogT("所选时间异常, 重新提交前一个可用日期");
+                gDays.RemoveAt(gDays.Count - 1);
+                pickDate();
+                pickTime();
+            }
+
+            string result = respHtml
+                .Replace("<head id=\"Head1\"><title>", "<head id=\"Head1\"><meta charset=\"UTF-8\"><title>")
+                .Replace("../", "https://www.visaservices.org.in/DIAC-China-Appointment/")
+                .Replace("Print Appointment Letter", "打印预约信")
+                .Replace("AppWelcome.aspx\">Home</a>", "AppWelcome.aspx\">主页</a>")
+                .Replace("Australian Visa Application Centre", "澳大利亚签证申请中心")
+                .Replace("Guangzhou", "广州")
+                .Replace("Shanghai", "上海")
+                .Replace("Beijing", "北京")
+                .Replace("Confirmation of Appointment", "预约确认")
+                .Replace("Please arrive at the Visa Application Centre not earlier than 10 minutes before the given time.<br>", "请在预约时间前10分钟抵达签证申请中心。")//英文网页多一个br
+                .Replace("Please remember to carry the following with you :", "请携带：")
+                .Replace("1. Your passport", "1. 护照")
+                .Replace("2. A completed and signed visa form", "2. 填写并签署的申请表")
+                .Replace("3. Printout of the checklist for the visa type being applied for", "3. 打印所申请签证类别适用的审核清单")
+                .Replace("4. Supporting documentation listed in the checklist", "4. 审核清单中所列的支持性文件")
+                .Replace("5. The fee amount – please check our website for the visa fee details and mode of payment.", "5. 费用-请在我们的网站上查询签证费详情和付款方式。")
+                .Replace("Entry into the Visa Application Centre is regulated by a security check. Please carry a print out of this appointment confirmation letter so that the same can be verified from our Daily Appointment List at the information counter.",
+                "进入签证申请中心需接受安检。请携带此预约信以便认证您的预约信息。")
+                .Replace("Reference Number", "确认号码")
+                .Replace("Visa Category", "签证类别")
+                .Replace("Appointment Date", "预约日期")
+                .Replace("Appointment Time", "预约时间")
+                .Replace("Sr. No.", "序列号码")
+                .Replace("Full Name", "姓名")
+                .Replace("Passport Number", "护照号码")
+                .Replace("Address of VAC", "签证申请中心地址")
+                .Replace("Unit 02, 29/F, HM Tower, No. 3, Jinsui Road,", "广州市天河区珠江新城金穗路3号")
+                .Replace("Zhujiang New Town, Tianhe District, 广州  ", "汇美大厦29楼02单元 邮编：")
+                .Replace("Enquiry Number", "问询号码")
+                .Replace("2nd Floor, Jiushi Commercial Building,", "中国上海市黄浦区四川中路213号久事商务大厦2层,")
+                .Replace("No. 213 Middle Sichuan Rd., Huangpu District, 上海, 200002, China ", "邮编200002. ")
+                .Replace("Room C,D,E,F,G,H,I, 21st Floor", "中国北京东城区东直门外大街")
+                .Replace("Oriental Kenzo Plaza, No.48 Dongzhimenwai Street Dongcheng District, 北京 , P.R. China 100027", "48号东方银座写字楼21层D-I室 邮编：100027 ");
+            
+            downloadHtml(result);
 
             return 1;
         }
@@ -1047,9 +1196,15 @@ namespace WHA_avac
                 label6.Visible = false;
             }
 
-            create();
+            //create();
+            //not neccessary; enable ->Chinese letter; disable -> English letter; daiyyr
+
+
             selectLocation();
-            selectVisaType();
+            if (selectVisaType() == -9)
+            {
+                return;
+            }
             
             if (textBox1.InvokeRequired)
             {
@@ -1066,7 +1221,8 @@ namespace WHA_avac
         }
 
         public void autoT2() {
-            if (fillInDetails() == -2)//incorrect vervification code
+            int fillInResult = fillInDetails();
+            if (fillInResult == -2)//incorrect vervification code
             {
                 if (textBox1.InvokeRequired)
                 {
@@ -1074,6 +1230,7 @@ namespace WHA_avac
                     {
                         textBox1.Text = "";
                         textBox1.ReadOnly = false;
+                        textBox1.Focus();
                         label6.Visible = true;
                     });
                     textBox1.Invoke(sl);
@@ -1082,12 +1239,21 @@ namespace WHA_avac
                 {
                     textBox1.Text = "";
                     textBox1.ReadOnly = false;
+                    textBox1.Focus();
                     label6.Visible = true;
                 }
                 return;
             }
+            if (fillInResult == -1 || fillInResult == -3)
+            {
+                return;
+            }
 
-            pickDate();
+            if (pickDate() == -1)
+            {
+                return;
+            }
+
             pickTime();
             
         }
@@ -1101,6 +1267,8 @@ namespace WHA_avac
 
         private void autoB_Click(object sender, EventArgs e)
         {
+          //  comboBox1.Enabled = false;
+          //  rate.Enabled = false;
             Thread t = new Thread(autoT);
             t.Start();
         }
@@ -1119,6 +1287,9 @@ namespace WHA_avac
         }
 
         public delegate void delegate2();
+
+
+        /*
         public void addURL()
         {
             //string P = @"^http(s)?:\/\/([\w-]+\.)+[\w-]+$";//无法匹配下级页面
@@ -1159,6 +1330,7 @@ namespace WHA_avac
             writeFile(System.Environment.CurrentDirectory + "\\" + "urlList", strCollected);
         }
 
+       
         public void deleteURL()
         {
             if (urlList.InvokeRequired)
@@ -1193,23 +1365,24 @@ namespace WHA_avac
             }
             writeFile(System.Environment.CurrentDirectory + "\\" + "urlList", strCollected);
         }
-
+        */
         private void addB_Click(object sender, EventArgs e)
         {
-            Thread t = new Thread(addURL);
-            t.Start();
+       //     Thread t = new Thread(addURL);
+       //     t.Start();
         }
 
         private void deleteB_Click(object sender, EventArgs e)
         {
-            Thread t = new Thread(deleteURL);
-            t.Start();
+       //     Thread t = new Thread(deleteURL);
+       //     t.Start();
         }
-
+        
         private void textBox1_TextChanged(object sender, EventArgs e)
         {
             if (textBox1.Text.Length == 5)
             {
+                gVerificationCode = textBox1.Text.Substring(0, 5);
                 if (textBox1.InvokeRequired)
                 {
                     delegate2 sl = new delegate2(delegate()
@@ -1224,11 +1397,10 @@ namespace WHA_avac
                     textBox1.ReadOnly = true;
                     label6.Visible = false;
                 }
-
-                gVerificationCode = textBox1.Text;
-                autoT2();
-                
+                Thread t = new Thread(autoT2);
+                t.Start();
             }
+            
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -1239,6 +1411,7 @@ namespace WHA_avac
                 {
                     textBox1.Text = "";
                     textBox1.ReadOnly = false;
+                    textBox1.Focus();
                     label6.Visible = true;
                 });
                 textBox1.Invoke(sl);
@@ -1247,6 +1420,7 @@ namespace WHA_avac
             {
                 textBox1.Text = "";
                 textBox1.ReadOnly = false;
+                textBox1.Focus();
                 label6.Visible = true;
             }
         }
@@ -1269,7 +1443,6 @@ namespace WHA_avac
             }
 
             //test string 2 DateTime
-
             int year = 2015;
             string strDt = year.ToString() + "April25";
             DateTimeFormatInfo dtFormat = new DateTimeFormatInfo();
@@ -1283,14 +1456,25 @@ namespace WHA_avac
             {
                 setLogT( myMatch.Groups[0].Value);
             }
+
+            setLogT(comboBox1.SelectedItem.ToString());
+
+            gDays.Add("1 data");
+            gDays.Add("2 data");
+            gDays.Add("3 data");
+            setLogT(gDays.Last());
+        }
+
+        private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            gCategory = comboBox1.SelectedIndex == 0 ? "17" : "13";    //13 for general, 17 for work and holiday
         }
     }
 }
 
-//提交日期不成功
-//选择类别时，是否不需要提交两次
-//验证码第一次错后，一直cuo
-//直接post a inavailible date, could succeed?
-//下载PDF
-//确定不需要访问第一页？
-//验证码窗口自动获取焦点
+//选择类别时，是否不需要提交两次: 是，不需要.
+//直接post a inavailable date, could succeed?  不可以
+//不需要访问第一页？  如果不get首页，最终将返回英文预约页，且英文预约者在中文页重新申请，仍显示名额满；所以可跳过首页的GET和POST , 替换预约页
+
+//清理冗余代码、禁用测试单元
+//如果出现两个月的日期，能不翻页直接提交第二个月的最晚时间？
