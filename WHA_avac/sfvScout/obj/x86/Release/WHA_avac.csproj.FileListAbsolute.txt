@@ -5,3 +5,4 @@
 \\Mac\Home\sourcecode\yueavac\WHA_avac\sfvScout\obj\x86\Release\WHA_avac.Properties.Resources.resources
 \\Mac\Home\sourcecode\yueavac\WHA_avac\sfvScout\obj\x86\Release\WHA_avac.exe
 \\Mac\Home\sourcecode\yueavac\WHA_avac\sfvScout\obj\x86\Release\WHA_avac.pdb
+\\Mac\Home\sourcecode\yueavac\WHA_avac\sfvScout\obj\x86\Release\WHA_avac.csprojResolveAssemblyReference.cache

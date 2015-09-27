@@ -40,7 +40,7 @@ namespace WHA_avac
                gFirstName = "jinping",
                gLastName = "xi",
                gMobile = "139034000",
-               gPassport = "E7743779483",
+               gPassport = "E72426483",
                gSTDCode = "0533";
         List<String> gDays = new List<string>(); //5721 means 2015.08.31, the number of days since 2000.01.01
                                                  //默认选择最晚日期
@@ -364,26 +364,27 @@ namespace WHA_avac
         */
         public void setRequest(HttpWebRequest req)
         {
-            req.AllowAutoRedirect = false;
-            req.Accept = "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8";
+            //req.Accept = "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8";
             //req.Accept = "*/*";
             //req.Connection = "keep-alive";
-            req.KeepAlive = true;
-            req.UserAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.10; rv:40.0) Gecko/20100101 Firefox/40.0";
+            //req.KeepAlive = true;
+            //req.UserAgent = "Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 6.1; WOW64; Trident/4.0; SLCC2; .NET CLR 2.0.50727; .NET CLR 3.5.30729; .NET CLR 3.0.30729; Media Center PC 6.0; InfoPath.3; .NET4.0C; .NET4.0E";
             //req.UserAgent = "Mozilla/5.0 (Windows NT 6.3; WOW64; rv:37.0) Gecko/20100101 Firefox/37.0";
             //req.UserAgent = "Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 6.1; WOW64; Trident/4.0; SLCC2; .NET CLR 2.0.50727; .NET CLR 3.5.30729; .NET CLR 3.0.30729; Media Center PC 6.0; InfoPath.3; .NET4.0C; .NET4.0E";
-            req.Headers["Accept-Encoding"] = "gzip, deflate";
-            req.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
+            //req.Headers["Accept-Encoding"] = "gzip, deflate";
+            //req.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
 
             req.Host = "www.visaservices.org.in";
 
+            req.AllowAutoRedirect = false;
+            req.ContentType = "application/x-www-form-urlencoded";
+            req.UserAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.10; rv:40.0) Gecko/20100101 Firefox/40.0";
             req.CookieContainer = new CookieContainer();
             req.CookieContainer.PerDomainCapacity = 40;
             if (gCookieContainer != null)
             {
                 req.CookieContainer.Add(gCookieContainer);
             }
-            req.ContentType = "application/x-www-form-urlencoded";
         }
 
         public int writePostData(HttpWebRequest req, string data)
@@ -409,6 +410,16 @@ namespace WHA_avac
 
         public string resp2html(HttpWebResponse resp)
         {
+            if (resp.StatusCode == HttpStatusCode.OK)
+            {
+                StreamReader stream = new StreamReader(resp.GetResponseStream());
+                return stream.ReadToEnd();
+            }
+            else
+            {
+                return resp.StatusDescription;
+            }
+            /*
             string respHtml = "";
             char[] cbuffer = new char[256];
             Stream respStream = resp.GetResponseStream();
@@ -442,6 +453,7 @@ namespace WHA_avac
             respStreamReader.Close();
             respStream.Close();
             return respHtml;
+             */ 
         }
 
 
