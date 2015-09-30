@@ -21,14 +21,14 @@ namespace WHA_avac
 
         string reg = "";
         Match myMatch;
- 
-        string gViewstate = "";
-        string gEventvalidation = "";
-        string gVerificationCode = "";
-        int gTicket = 1;
+        int gThreadNo = -1;
+        int waitForEnterVerificationCode = -1;
 
-        CookieCollection gCookieContainer = null;
-
+        List<string> gViewstate = new List<string>();
+        List<string> gEventvalidation = new List<string>();
+        List<string> gVerificationCode = new List<string>();
+        List<CookieCollection> gCookieContainer = new List<CookieCollection>();
+        List<int> gTicket = new List<int>();
 
 
         string gVACity_raw = "beijing",     //  30 for guangzhou;29 for shanghai;28 for beijing
@@ -40,11 +40,11 @@ namespace WHA_avac
                gFirstName = "jinping",
                gLastName = "xi",
                gMobile = "139034000",
-               gPassport = "E72426483",
+               gPassport = "E72777483",
                gSTDCode = "0533";
         List<String> gDays = new List<string>(); //5721 means 2015.08.31, the number of days since 2000.01.01
+                                                 //所有线程共同管理一个天数表，只有第一个获得天数页的线程可以添加可用天数
                                                  //默认选择最晚日期
-
         string gTime = "02";    //02~24, 15分钟一个时段，某个时段满了则后面的时段号均-1
                                 //例如
                                 /**
@@ -78,32 +78,32 @@ namespace WHA_avac
   //      string password = "Dd123456";
 
 
-        public delegate void setLog(string str1);
-        public void setLogT(string s)
+        public delegate void setLog(int threadNo, string str1);
+        public void setLogT(int threadNo, string s)
         {
             if (logT.InvokeRequired)
             {
                 // 实例一个委托，匿名方法，
-                setLog sl = new setLog(delegate(string text)
+                setLog sl = new setLog(delegate(int number, string text)
                 {
-                    logT.AppendText(DateTime.Now.ToString() + " " + text + Environment.NewLine);
+                    logT.AppendText("线程" + number.ToString() + " " + DateTime.Now.ToString() + " " + text + Environment.NewLine);
                 });
                 // 把调用权交给创建控件的线程，带上参数
-                logT.Invoke(sl, s);
+                logT.Invoke(sl,threadNo, s);
             }
             else
             {
-                logT.AppendText(DateTime.Now.ToString() + " " + s + Environment.NewLine);
+                logT.AppendText("线程" + threadNo.ToString() + " " + DateTime.Now.ToString() + " " + s + Environment.NewLine);
             }
         }
 
-        public void setLogtRed(string s)
+        public void setLogtRed(int threadNo, string s)
         {
             if (logT.InvokeRequired)
             {
-                setLog sl = new setLog(delegate(string text)
+                setLog sl = new setLog(delegate(int number, string text)
                 {
-                    logT.AppendText(DateTime.Now.ToString() + " " + text + Environment.NewLine);
+                    logT.AppendText("线程" + number.ToString()+" " + DateTime.Now.ToString() + " " + text + Environment.NewLine);
                     int i = logT.Text.LastIndexOf("\n", logT.Text.Length - 2);
                     if (i > 1)
                     {
@@ -113,11 +113,11 @@ namespace WHA_avac
                         logT.SelectionFont = new Font(Font, FontStyle.Bold);
                     }
                 });
-                logT.Invoke(sl, s);
+                logT.Invoke(sl, threadNo, s);
             }
             else
             {
-                logT.AppendText(DateTime.Now.ToString() + " " + s + Environment.NewLine);
+                logT.AppendText("线程" + threadNo.ToString() + " " + DateTime.Now.ToString() + " " + s + Environment.NewLine);
                 int i = logT.Text.LastIndexOf("\n", logT.Text.Length - 2);
                 if (i > 1)
                 {
@@ -154,6 +154,7 @@ namespace WHA_avac
 
             if (debug)
             {
+                this.ClientSize = new System.Drawing.Size(950, 600);
                 comboBox1.SelectedIndex = 1; //normal
                 button2.Visible = true;
                 testLog.Visible = true;
@@ -362,7 +363,7 @@ namespace WHA_avac
             }
         }
         */
-        public void setRequest(HttpWebRequest req)
+        public void setRequest(HttpWebRequest req, int threadNo)
         {
             //req.Accept = "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8";
             //req.Accept = "*/*";
@@ -381,13 +382,13 @@ namespace WHA_avac
             req.UserAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.10; rv:40.0) Gecko/20100101 Firefox/40.0";
             req.CookieContainer = new CookieContainer();
             req.CookieContainer.PerDomainCapacity = 40;
-            if (gCookieContainer != null)
+            if (gCookieContainer[threadNo] != null)
             {
-                req.CookieContainer.Add(gCookieContainer);
+                req.CookieContainer.Add(gCookieContainer[threadNo]);
             }
         }
 
-        public int writePostData(HttpWebRequest req, string data)
+        public int writePostData(int threadNo, HttpWebRequest req, string data)
         {
             byte[] postBytes = Encoding.UTF8.GetBytes(data);
             req.ContentLength = postBytes.Length;
@@ -400,7 +401,7 @@ namespace WHA_avac
             }
             catch (WebException webEx)
             {
-                setLogT("GetRequestStream," + webEx.Status.ToString());
+                setLogT(threadNo,"GetRequestStream," + webEx.Status.ToString());
                 return -1;
             }
             
@@ -460,13 +461,13 @@ namespace WHA_avac
         /* 
          * return success or not
          */
-        public int weLoveMuYue(string url, string method, string referer, bool allowAutoRedirect, string postData)
+        public int weLoveMuYue(int threadNo, string url, string method, string referer, bool allowAutoRedirect, string postData)
         {
             while (true)
             {
                 HttpWebRequest req = (HttpWebRequest)WebRequest.Create(url);
                 HttpWebResponse resp = null;
-                setRequest(req);
+                setRequest(req, threadNo);
                 req.Method = method;
                 req.Referer = referer;
                 if (allowAutoRedirect)
@@ -476,7 +477,7 @@ namespace WHA_avac
             
                 if (method.Equals("POST"))
                 {
-                    if (writePostData(req, postData) < 0)
+                    if (writePostData(threadNo, req, postData) < 0)
                     {
                         continue;
                     }
@@ -488,7 +489,7 @@ namespace WHA_avac
                 }
                 catch (WebException webEx)
                 {
-                    setLogT("respStreamReader, " + webEx.Status.ToString());
+                    setLogT(threadNo, "respStreamReader, " + webEx.Status.ToString());
                     continue;
                 }
                 if (resp != null)
@@ -504,7 +505,7 @@ namespace WHA_avac
                     continue;
                 }
                 setTestLog(req, respHtml);
-                gCookieContainer = req.CookieContainer.GetCookies(req.RequestUri);
+                gCookieContainer[threadNo] = req.CookieContainer.GetCookies(req.RequestUri);
                 resp.Close();
                 break;
             }
@@ -514,13 +515,13 @@ namespace WHA_avac
         /* 
          * return response HTML
          */
-        public string weLoveYue(string url, string method, string referer, bool allowAutoRedirect, string postData)
+        public string weLoveYue(int threadNo, string url, string method, string referer, bool allowAutoRedirect, string postData)
         {
             while (true)
             {
                 HttpWebRequest req = (HttpWebRequest)WebRequest.Create(url);
                 HttpWebResponse resp = null;
-                setRequest(req);
+                setRequest(req, threadNo);
                 req.Method = method;
                 req.Referer = referer;
                 if (allowAutoRedirect)
@@ -530,7 +531,7 @@ namespace WHA_avac
             
                 if (method.Equals("POST"))
                 {
-                    if (writePostData(req, postData) < 0)
+                    if (writePostData(threadNo, req, postData) < 0)
                     {
                         continue;
                     } 
@@ -542,7 +543,7 @@ namespace WHA_avac
                 }
                 catch (WebException webEx)
                 {
-                    setLogT("respStreamReader, " + webEx.Status.ToString());
+                    setLogT(threadNo, "respStreamReader, " + webEx.Status.ToString());
                     continue;
                 }
                 if (resp != null)
@@ -552,7 +553,7 @@ namespace WHA_avac
                     {
                         continue;
                     }
-                    gCookieContainer = req.CookieContainer.GetCookies(req.RequestUri);
+                    gCookieContainer[threadNo] = req.CookieContainer.GetCookies(req.RequestUri);
                     if (debug)
                     {
                         setTestLog(req, respHtml);
@@ -570,12 +571,12 @@ namespace WHA_avac
         /*
          * do not handle the response
          */
-        public HttpWebResponse weLoveYueer(HttpWebResponse resp, string url, string method, string referer, bool allowAutoRedirect, string postData)
+        public HttpWebResponse weLoveYueer(int threadNo, HttpWebResponse resp, string url, string method, string referer, bool allowAutoRedirect, string postData)
         {
             while (true)
             {
                 HttpWebRequest req = (HttpWebRequest)WebRequest.Create(url);
-                setRequest(req);
+                setRequest(req, threadNo);
                 req.Method = method;
                 req.Referer = referer;
                 if (allowAutoRedirect)
@@ -585,7 +586,7 @@ namespace WHA_avac
             
                 if (method.Equals("POST"))
                 {
-                    if (writePostData(req, postData) < 0)
+                    if (writePostData(threadNo, req, postData) < 0)
                     {
                         continue;
                     } 
@@ -596,12 +597,12 @@ namespace WHA_avac
                 }
                 catch (WebException webEx)
                 {
-                    setLogT("respStreamReader, " + webEx.Status.ToString());
+                    setLogT(threadNo, "respStreamReader, " + webEx.Status.ToString());
                     continue;
                 }
                 if (resp != null)
                 {
-                    gCookieContainer = req.CookieContainer.GetCookies(req.RequestUri);
+                    gCookieContainer[threadNo] = req.CookieContainer.GetCookies(req.RequestUri);
                     return resp;
                 }
                 else
@@ -613,14 +614,15 @@ namespace WHA_avac
 
 
 
-        public int create() 
+        public int create(int threadNo) 
         {
             string respHtml;
 
-            
-            setLogT("get first page..");
+
+            setLogT(threadNo, "get first page..");
 
             respHtml = weLoveYue(
+                threadNo,
                 "https://www.visaservices.org.in/DIAC-China-Appointment/AppScheduling/AppWelcome.aspx?p=Gta39GFZnstZVCxNVy83zTlkvzrXE95fkjmft28XjNg%3d",
                 "GET",
                 "",
@@ -631,59 +633,57 @@ namespace WHA_avac
             myMatch = (new Regex(reg)).Match(respHtml);
             if (myMatch.Success)
             {
-                gEventvalidation = myMatch.Groups[0].Value;
+                gEventvalidation[threadNo] = ToUrlEncode(myMatch.Groups[0].Value);
             }
-            gEventvalidation = ToUrlEncode(gEventvalidation);
 
             reg = @"(?<=id=""__VIEWSTATE"" value="").*?(?="" />)";
             myMatch = (new Regex(reg)).Match(respHtml);
             if (myMatch.Success)
             {
-                gViewstate = myMatch.Groups[0].Value;
+                gViewstate[threadNo] = ToUrlEncode(myMatch.Groups[0].Value);
 
             }
-            gViewstate = ToUrlEncode(gViewstate);
-            
 
 
-            setLogT("make a pointment..");
+
+            setLogT(threadNo, "make a pointment..");
             respHtml = weLoveYue(
+                threadNo,
                 "https://www.visaservices.org.in/DIAC-China-Appointment/AppScheduling/AppWelcome.aspx?p=Gta39GFZnstZVCxNVy83zTlkvzrXE95fkjmft28XjNg%3d",
                 "POST",
                 "https://www.visaservices.org.in/DIAC-China-Appointment/AppScheduling/AppWelcome.aspx?p=Gta39GFZnstZVCxNVy83zTlkvzrXE95fkjmft28XjNg%3d",
                 false,
-                "__EVENTTARGET=ctl00%24plhMain%24lnkSchApp&__EVENTARGUMENT=&__VIEWSTATE="+ gViewstate
-                +"&____Ticket="+gTicket.ToString()
-                +"&__EVENTVALIDATION="+gEventvalidation
+                "__EVENTTARGET=ctl00%24plhMain%24lnkSchApp&__EVENTARGUMENT=&__VIEWSTATE=" + gViewstate[threadNo]
+                + "&____Ticket=" + gTicket[threadNo].ToString()
+                + "&__EVENTVALIDATION=" + gEventvalidation[threadNo]
                 );
-            gTicket++;
+            gTicket[threadNo]++;
 
             reg = @"(?<=name=""__EVENTVALIDATION"" id=""__EVENTVALIDATION"" value="").*?(?="" />)";
             myMatch = (new Regex(reg)).Match(respHtml);
             if (myMatch.Success)
             {
-                gEventvalidation = myMatch.Groups[0].Value;
+                gEventvalidation[threadNo] = ToUrlEncode( myMatch.Groups[0].Value);
             }
-            gEventvalidation = ToUrlEncode(gEventvalidation);
 
             reg = @"(?<=id=""__VIEWSTATE"" value="").*?(?="" />)";
             myMatch = (new Regex(reg)).Match(respHtml);
             if (myMatch.Success)
             {
-                gViewstate = myMatch.Groups[0].Value;
+                gViewstate[threadNo] = ToUrlEncode( myMatch.Groups[0].Value);
 
             }
-            gViewstate = ToUrlEncode(gViewstate);
 
             return 1;
         }
 
 
-        public int selectLocation()
+        public int selectLocation(int threadNo)
         {
-            setLogT("selecting Location: " + gVACity_raw);
+            setLogT(threadNo, "selecting Location: " + gVACity_raw);
 
             string respHtml = weLoveYue(
+                threadNo,
                 "https://www.visaservices.org.in/DIAC-China-Appointment/AppScheduling/AppScheduling.aspx",
                 "POST",
                 "https://www.visaservices.org.in/DIAC-China-Appointment/AppScheduling/AppWelcome.aspx?p=Gta39GFZnstZVCxNVy83zTlkvzrXE95fkjmft28XjNg%3d",
@@ -696,34 +696,32 @@ namespace WHA_avac
                 + "VAC=" + gVACity
                 + "&ctl00%24plhMain%24btnSubmit=%E6%8F%90%E4%BA%A4&ctl00%24plhMain%24hdnValidation1"
                 + "=%E8%AF%B7%E9%80%89%E6%8B%A9%EF%BC%9A&ctl00%24plhMain%24hdnValidation2=%E7%AD%BE%E8%AF%81%E7%94%B3%E8"
-                + "%AF%B7%E4%B8%AD%E5%BF%83&ctl00%24plhMain%24hdnValidation3=%E5%B1%85%E4%BD%8F%E5%9B%BD&____Ticket="+gTicket.ToString()
+                + "%AF%B7%E4%B8%AD%E5%BF%83&ctl00%24plhMain%24hdnValidation3=%E5%B1%85%E4%BD%8F%E5%9B%BD&____Ticket="+gTicket[threadNo].ToString()
                 +"&__EVENTVALIDATION"
                 + "=Vl39F6qwZOICJpTa9PcH0gV%2FyeRGOfg5uQqROs1LRKtDZsxgCLg9LzkK%2F0bKajvKLYu88iUHiiiQQjV%2FynffMgplscVinn0GMf5vgACt66c"
                 + "%3D"
                 );
-            gTicket++;
+            gTicket[threadNo]++;
 
             reg = @"(?<=name=""__EVENTVALIDATION"" id=""__EVENTVALIDATION"" value="").*?(?="" />)";
             myMatch = (new Regex(reg)).Match(respHtml);
             if (myMatch.Success)
             {
-                gEventvalidation = myMatch.Groups[0].Value;
+                gEventvalidation[threadNo] = ToUrlEncode( myMatch.Groups[0].Value);
             }
-            gEventvalidation = ToUrlEncode(gEventvalidation);
 
             reg = @"(?<=id=""__VIEWSTATE"" value="").*?(?="" />)";
             myMatch = (new Regex(reg)).Match(respHtml);
             if (myMatch.Success)
             {
-                gViewstate = myMatch.Groups[0].Value;
+                gViewstate[threadNo] = ToUrlEncode( myMatch.Groups[0].Value);
 
             }
-            gViewstate = ToUrlEncode(gViewstate);
 
             return 1;
         }
 
-        public int selectVisaType()
+        public int selectVisaType(int threadNo)
         {
             string respHtml;
             /*
@@ -767,29 +765,30 @@ namespace WHA_avac
 
             delegate2 s0 = new delegate2(delegate()
             {
-                setLogT("submitting the visa type: " + comboBox1.SelectedItem.ToString());
+                setLogT(threadNo, "submitting the visa type: " + comboBox1.SelectedItem.ToString());
             });
             textBox1.Invoke(s0);
             respHtml = weLoveYue(
+                threadNo,
                 "https://www.visaservices.org.in/DIAC-China-Appointment/AppScheduling/AppSchedulingGetInfo.aspx",
                 "POST",
                 "https://www.visaservices.org.in/DIAC-China-Appointment/AppScheduling/AppSchedulingGetInfo.aspx",
                 false,
-                "__EVENTTARGET=&__EVENTARGUMENT=&__LASTFOCUS=&__VIEWSTATE="+gViewstate
+                "__EVENTTARGET=&__EVENTARGUMENT=&__LASTFOCUS=&__VIEWSTATE=" + gViewstate[threadNo]
                 +"&ctl00%24plhMain%24tbxNumOfApplicants"
                 +"=1&ctl00%24plhMain%24cboVisaCategory=" + gCategory //13 for general, 17 for working and holiday
                 +"&ctl00%24plhMain%24btnSubmit=%E6%8F%90%E4%BA%A4&ctl00%24plhMain"
                 +"%24hdnValidation1=%E8%AF%B7%E8%BE%93%E5%85%A5%EF%BC%9A&ctl00%24plhMain%24hdnValidation2=%E6%9C%89%E6"
                 +"%95%88%E4%BA%BA%E6%95%B0%E3%80%82&ctl00%24plhMain%24hdnValidation3=%E6%8A%A5%E5%90%8D%E4%BA%BA%E6%95"
                 +"%B0%E5%BF%85%E9%A1%BB%E4%BB%8B%E4%BA%8E1%E5%92%8C++&ctl00%24plhMain%24hdnValidation4=%E7%AD%BE%E8%AF"
-                +"%81%E7%B1%BB%E5%88%AB&____Ticket="+gTicket.ToString()
-                +"&__EVENTVALIDATION=" + gEventvalidation
+                +"%81%E7%B1%BB%E5%88%AB&____Ticket="+gTicket[threadNo].ToString()
+                + "&__EVENTVALIDATION=" + gEventvalidation[threadNo]
                 );
-            gTicket++;
+            gTicket[threadNo]++;
 
             if (respHtml.Contains("No date(s) available for appointment.") || respHtml.Contains("无日期（S）委任。"))
             {
-                setLogT("该类别名额已满，不要灰心，备战下一次");
+                setLogT(threadNo, "该类别名额已满，不要灰心，备战下一次");
                 return -9;
             }
 
@@ -797,19 +796,17 @@ namespace WHA_avac
             myMatch = (new Regex(reg)).Match(respHtml);
             if (myMatch.Success)
             {
-                gEventvalidation = myMatch.Groups[0].Value;
+                gEventvalidation[threadNo] = ToUrlEncode( myMatch.Groups[0].Value);
                 
             }
-            gEventvalidation = ToUrlEncode(gEventvalidation);
 
             reg = @"(?<=id=""__VIEWSTATE"" value="").*?(?="" />)";
             myMatch = (new Regex(reg)).Match(respHtml);
             if (myMatch.Success)
             {
-                gViewstate = myMatch.Groups[0].Value;
+                gViewstate[threadNo] = ToUrlEncode( myMatch.Groups[0].Value);
                 
             }
-            gViewstate = ToUrlEncode(gViewstate);
 
             string cCodeGuid = "";
             reg = @"(?<=MyCaptchaImage.aspx\?guid=).*?(?="" border=)";
@@ -818,7 +815,12 @@ namespace WHA_avac
             {
                 cCodeGuid = myMatch.Groups[0].Value;
             }
+            while (waitForEnterVerificationCode>=0)
+            {
+                Thread.Sleep(50);
+            }
 
+            waitForEnterVerificationCode = threadNo;
             if (textBox1.InvokeRequired)
             {
                 delegate2 sl = new delegate2(delegate()
@@ -827,6 +829,7 @@ namespace WHA_avac
                     textBox1.Text = "";
                     textBox1.ReadOnly = false;
                     textBox1.Focus();
+                    label6.Text = "线程" + threadNo.ToString() + ":请输入验证码";
                     label6.Visible = true;
                 });
                 textBox1.Invoke(sl);
@@ -837,6 +840,7 @@ namespace WHA_avac
                 textBox1.Text = "";
                 textBox1.ReadOnly = false;
                 textBox1.Focus();
+                label6.Text = "线程" + threadNo.ToString() + ":请输入验证码";
                 label6.Visible = true;
             }
 
@@ -844,16 +848,17 @@ namespace WHA_avac
         }
 
 
-        public int fillInDetails()
+        public int fillInDetails(int threadNo)
         {
-            setLogT("filling in details..");
+            setLogT(threadNo, "filling in details..");
 
             string respHtml = weLoveYue(
+                threadNo,
                 "https://www.visaservices.org.in/DIAC-China-Appointment/AppScheduling/AppSchedulingVisaCategory.aspx",
                 "POST",
                 "https://www.visaservices.org.in/DIAC-China-Appointment/AppScheduling/AppSchedulingGetInfo.aspx",
                 false,
-                "__VIEWSTATE=" + gViewstate
+                "__VIEWSTATE=" + gViewstate[threadNo]
                 + "&ctl00%24plhMain%24repAppVisaDetails%24ctl01%24tbxPassportNo="
                 + gPassport
                 + "&ctl00%24plhMain%24repAppVisaDetails"
@@ -887,32 +892,30 @@ namespace WHA_avac
                 + "%B3%E8%AF%B7%E4%BA%BA%E6%B2%A1%E6%9C%89%E3%80%82&ctl00%24plhMain%24hdnValidation8=%E8%AF%B7%E5%AF%B9"
                 + "%E7%94%B3%E8%AF%B7%E4%BA%BA%E6%B2%A1%E6%9C%89%E8%BE%93%E5%85%A5%E6%9C%89%E6%95%88%E7%9A%84GWFNo%E7%9A"
                 + "%84%E3%80%82&ctl00%24plhMain%24hdnValidation9=%E8%AF%B7%E9%80%89%E6%8B%A9%E7%AD%BE%E8%AF%81%E7%B1%BB"
-                + "%E5%88%AB%E7%9A%84%E7%94%B3%E8%AF%B7%E4%BA%BA%E6%B2%A1%E6%9C%89%E3%80%82&____Ticket="+gTicket.ToString()
-                + "&__EVENTVALIDATION=" + gEventvalidation
-                + "&ctl00%24plhMain%24mycaptchacontrol1=" + gVerificationCode
+                + "%E5%88%AB%E7%9A%84%E7%94%B3%E8%AF%B7%E4%BA%BA%E6%B2%A1%E6%9C%89%E3%80%82&____Ticket="+gTicket[threadNo].ToString()
+                + "&__EVENTVALIDATION=" + gEventvalidation[threadNo]
+                + "&ctl00%24plhMain%24mycaptchacontrol1=" + gVerificationCode[threadNo]
                 );
-            gTicket++;
+            gTicket[threadNo]++;
 
             reg = @"(?<=name=""__EVENTVALIDATION"" id=""__EVENTVALIDATION"" value="").*?(?="" />)";
             myMatch = (new Regex(reg)).Match(respHtml);
             if (myMatch.Success)
             {
-                gEventvalidation = myMatch.Groups[0].Value;
+                gEventvalidation[threadNo] = ToUrlEncode( myMatch.Groups[0].Value);
             }
-            gEventvalidation = ToUrlEncode(gEventvalidation);
 
             reg = @"(?<=id=""__VIEWSTATE"" value="").*?(?="" />)";
             myMatch = (new Regex(reg)).Match(respHtml);
             if (myMatch.Success)
             {
-                gViewstate = myMatch.Groups[0].Value;
+                gViewstate[threadNo] = ToUrlEncode( myMatch.Groups[0].Value);
 
             }
-            gViewstate = ToUrlEncode(gViewstate);
 
             if (respHtml.Contains("correct CAPTCHA alphabets"))
             {
-                setLogT("验证码错误！请重新输入");
+                setLogT(threadNo, "验证码错误！请重新输入");
                 string cCodeGuid = "";
                 reg = @"(?<=MyCaptchaImage.aspx\?guid=).*?(?="" border=)";
                 myMatch = (new Regex(reg)).Match(respHtml);
@@ -920,33 +923,63 @@ namespace WHA_avac
                 {
                     cCodeGuid = myMatch.Groups[0].Value;
                 }
-                pictureBox1.ImageLocation = @"https://www.visaservices.org.in/DIAC-China-Appointment/AppScheduling/MyCaptchaImage.aspx?guid=" + cCodeGuid;
+
+                while (waitForEnterVerificationCode>=0)
+                {
+                    Thread.Sleep(50);
+                }
+                waitForEnterVerificationCode = threadNo;
+                if (textBox1.InvokeRequired)
+                {
+                    delegate2 sl = new delegate2(delegate()
+                    {
+                        pictureBox1.ImageLocation = @"https://www.visaservices.org.in/DIAC-China-Appointment/AppScheduling/MyCaptchaImage.aspx?guid=" + cCodeGuid;
+                        textBox1.Text = "";
+                        textBox1.ReadOnly = false;
+                        textBox1.Focus();
+                        label6.Text = "线程" + threadNo.ToString() + ":请输入验证码";
+                        label6.Visible = true;
+                    });
+                    textBox1.Invoke(sl);
+                }
+                else
+                {
+                    pictureBox1.ImageLocation = @"https://www.visaservices.org.in/DIAC-China-Appointment/AppScheduling/MyCaptchaImage.aspx?guid=" + cCodeGuid;
+                    textBox1.Text = "";
+                    textBox1.ReadOnly = false;
+                    textBox1.Focus();
+                    label6.Text = "线程" + threadNo.ToString() + ":请输入验证码";
+                    label6.Visible = true;
+                }
             
                 return -2;
             }
 
             if (respHtml.Contains("申请人已预约")||respHtml.Contains("Marked applicants already have an appointment.") )
             {
-                setLogT("申请人已预约: " + gLastName +" "+ gFirstName +", 护照: " + gPassport);
+                setLogT(threadNo, "申请人已预约: " + gLastName + " " + gFirstName + ", 护照: " + gPassport);
                 return -3;
             }
 
             if (respHtml.Contains("Applicant Details") && respHtml.Contains("Please enter"))
             {
-                setLogT("incompleted personal details");
+                setLogT(threadNo, "incompleted personal details");
                 return -1;
             }
-
-            reg = @"(?<=Appointment',')\d+?(?='\)"" style=""color:Black"" title="")";
-            myMatch = (new Regex(reg)).Match(respHtml);
-            while (myMatch.Success)
+            if (gDays.Count == 0)
             {
-                gDays.Add(myMatch.Groups[0].Value);
-                myMatch = myMatch.NextMatch();
+                reg = @"(?<=Appointment',')\d+?(?='\)"" style=""color:Black"" title="")";
+                myMatch = (new Regex(reg)).Match(respHtml);
+                while (myMatch.Success)
+                {
+                    gDays.Add(myMatch.Groups[0].Value);
+                    myMatch = myMatch.NextMatch();
+                }
             }
+            
             if (gDays.Count==0)
             {
-                setLogT(gVACity_raw + ", " + (gCategory.Equals("17") ? "working and holiday, " : "general") + ", 名额已满, 请尝试其它预约地点");
+                setLogT(threadNo, gVACity_raw + ", " + (gCategory.Equals("17") ? "working and holiday, " : "general") + ", 名额已满, 请尝试其它预约地点");
                 return -1;
             }
 
@@ -1005,37 +1038,38 @@ namespace WHA_avac
  
             return 1;
         }
-
-        public int pickDate()
+        
+        public int pickDate(int threadNo)
         {
             while(true)
             {
-                setLogT("pickDate..");
+                setLogT(threadNo, "pickDate..");
 
                 if (gDays.Count == 0)
                 {
-                    setLogT(gVACity_raw + ", " + (gCategory.Equals("17") ? "working and holiday, " : "general") + ", 名额已满, 请尝试其它预约地点");
+                    setLogT(threadNo, gVACity_raw + ", " + (gCategory.Equals("17") ? "working and holiday, " : "general") + ", 名额已满, 请尝试其它预约地点");
                     return -1;
                 }
 
                 string respHtml = weLoveYue(
+                    threadNo,
                     "https://www.visaservices.org.in/DIAC-China-Appointment/AppScheduling/AppSchedulingInterviewDate.aspx",
                     "POST",
                     "https://www.visaservices.org.in/DIAC-China-Appointment/AppScheduling/AppSchedulingVisaCategory.aspx",
                     false,
                     "__EVENTTARGET=ctl00%24plhMain%24cldAppointment&__EVENTARGUMENT="
                     + gDays.Last()
-                    + "&__VIEWSTATE=" + gViewstate
-                    + "&____Ticket=" + gTicket.ToString()
-                    + "&__EVENTVALIDATION=" + gEventvalidation
+                    + "&__VIEWSTATE=" + gViewstate[threadNo]
+                    + "&____Ticket=" + gTicket[threadNo].ToString()
+                    + "&__EVENTVALIDATION=" + gEventvalidation[threadNo]
                     );
-                gTicket++;
+                gTicket[threadNo]++;
 
                 reg = @"style=""color:Black"" title="".*?"">\d+</a></td><td align=""center""";
                 myMatch = (new Regex(reg)).Match(respHtml);
                 if (myMatch.Success)
                 {
-                    setLogT("所选日期异常，选择前一个可用天");
+                    setLogT(threadNo, "所选日期异常，选择前一个可用天");
                     gDays.RemoveAt(gDays.Count - 1);
                     continue;
                 }
@@ -1045,39 +1079,38 @@ namespace WHA_avac
                 myMatch = (new Regex(reg)).Match(respHtml);
                 if (myMatch.Success)
                 {
-                    gEventvalidation = myMatch.Groups[0].Value;
+                    gEventvalidation[threadNo] = ToUrlEncode( myMatch.Groups[0].Value);
 
                 }
-                gEventvalidation = ToUrlEncode(gEventvalidation);
 
                 reg = @"(?<=id=""__VIEWSTATE"" value="").*?(?="" />)";
                 myMatch = (new Regex(reg)).Match(respHtml);
                 if (myMatch.Success)
                 {
-                    gViewstate = myMatch.Groups[0].Value;
+                    gViewstate[threadNo] = ToUrlEncode( myMatch.Groups[0].Value);
 
                 }
-                gViewstate = ToUrlEncode(gViewstate);
 
                 return 1;
             }
         }
 
-        public int pickTime()
+        public int pickTime(int threadNo)
         {
-            setLogT("pickTime..");
+            setLogT(threadNo, "pickTime..");
 
             string respHtml = weLoveYue(
+                threadNo,
                 "https://www.visaservices.org.in/DIAC-China-Appointment/AppScheduling/AppSchedulingInterviewDate.aspx",
                 "POST",
                 "https://www.visaservices.org.in/DIAC-China-Appointment/AppScheduling/AppSchedulingInterviewDate.aspx",
                 false,
                 "__EVENTTARGET=ctl00%24plhMain%24gvSlot%24ctl" + gTime
-                +"%24lnkTimeSlot&__EVENTARGUMENT=&__VIEWSTATE=" + gViewstate
-            +"&____Ticket="+gTicket.ToString()
-            +"&__EVENTVALIDATION="+ gEventvalidation
+                +"%24lnkTimeSlot&__EVENTARGUMENT=&__VIEWSTATE=" + gViewstate[threadNo]
+            +"&____Ticket="+gTicket[threadNo].ToString()
+            +"&__EVENTVALIDATION="+ gEventvalidation[threadNo]
             );
-            gTicket++;
+            gTicket[threadNo]++;
 
             string lblReference = "";
             reg = @"(?<=<span id=""lblReference"">).*?(?=</span>)";
@@ -1085,14 +1118,14 @@ namespace WHA_avac
             if (myMatch.Success)
             {
                 lblReference = myMatch.Groups[0].Value;
-                setLogT("预约成功！预约号: "+lblReference+"\n确认信已下载到软件所在位置，请截图或拍照并请牢记预约号。");
+                setLogT(threadNo, "预约成功！预约号: " + lblReference + "\n确认信已下载到软件所在位置，请截图或拍照并请牢记预约号。");
             }
             else
             {
-                setLogT("所选时间异常, 重新提交前一个可用日期");
+                setLogT(threadNo, "所选时间异常, 重新提交前一个可用日期");
                 gDays.RemoveAt(gDays.Count - 1);
-                pickDate();
-                pickTime();
+                pickDate(threadNo);
+                pickTime(threadNo);
             }
 
             string result = respHtml
@@ -1192,28 +1225,15 @@ namespace WHA_avac
      }
  }
  */
-        public void autoT() {
-            if (textBox1.InvokeRequired)
-            {
-                delegate2 sl = new delegate2(delegate()
-                {
-                    textBox1.ReadOnly = true;
-                    label6.Visible = false;
-                });
-                textBox1.Invoke(sl);
-            }
-            else
-            {
-                textBox1.ReadOnly = true;
-                label6.Visible = false;
-            }
-
+        public void autoT(int threadNo)
+        {
+            
             //create();
             //not neccessary; enable ->Chinese letter; disable -> English letter; daiyyr
 
 
-            selectLocation();
-            if (selectVisaType() == -9)
+            selectLocation(threadNo);
+            if (selectVisaType(threadNo) == -9)
             {
                 return;
             }
@@ -1232,28 +1252,12 @@ namespace WHA_avac
             }
         }
 
-        public void autoT2() {
-            int fillInResult = fillInDetails();
+        public void autoT2(int threadNo)
+        {
+            waitForEnterVerificationCode = -1;
+            int fillInResult = fillInDetails(threadNo);
             if (fillInResult == -2)//incorrect vervification code
             {
-                if (textBox1.InvokeRequired)
-                {
-                    delegate2 sl = new delegate2(delegate()
-                    {
-                        textBox1.Text = "";
-                        textBox1.ReadOnly = false;
-                        textBox1.Focus();
-                        label6.Visible = true;
-                    });
-                    textBox1.Invoke(sl);
-                }
-                else
-                {
-                    textBox1.Text = "";
-                    textBox1.ReadOnly = false;
-                    textBox1.Focus();
-                    label6.Visible = true;
-                }
                 return;
             }
             if (fillInResult == -1 || fillInResult == -3)
@@ -1261,12 +1265,12 @@ namespace WHA_avac
                 return;
             }
 
-            if (pickDate() == -1)
+            if (pickDate(threadNo) == -1)
             {
                 return;
             }
 
-            pickTime();
+            pickTime(threadNo);
             
         }
             
@@ -1279,10 +1283,24 @@ namespace WHA_avac
 
         private void autoB_Click(object sender, EventArgs e)
         {
-          //  comboBox1.Enabled = false;
-          //  rate.Enabled = false;
-            Thread t = new Thread(autoT);
-            t.Start();
+            gThreadNo++;
+            gViewstate.Add("");
+            gEventvalidation.Add("");
+            gVerificationCode.Add("");
+            gCookieContainer.Add(null);
+            gTicket.Add(1);
+
+            ThreadStart starter = delegate { autoT(gThreadNo); };
+            new Thread(starter).Start();
+
+            //使用线程池
+            //WaitCallback callback = delegate(object state) { autoT((int)state); };
+            //ThreadPool.QueueUserWorkItem(callback, gThreadNo);
+
+            //使用ParameterizedThreadStart
+            //Thread tt = new Thread(new ParameterizedThreadStart(autoT));
+            //t.Start(gThreadNo);
+
         }
 
         private void rate_KeyPress(object sender, KeyPressEventArgs e)
@@ -1394,7 +1412,7 @@ namespace WHA_avac
         {
             if (textBox1.Text.Length == 5)
             {
-                gVerificationCode = textBox1.Text.Substring(0, 5);
+                gVerificationCode[waitForEnterVerificationCode] = textBox1.Text.Substring(0, 5);
                 if (textBox1.InvokeRequired)
                 {
                     delegate2 sl = new delegate2(delegate()
@@ -1409,8 +1427,9 @@ namespace WHA_avac
                     textBox1.ReadOnly = true;
                     label6.Visible = false;
                 }
-                Thread t = new Thread(autoT2);
-                t.Start();
+
+                ThreadStart starter = delegate { autoT2(waitForEnterVerificationCode); };
+                new Thread(starter).Start();
             }
             
         }
@@ -1443,7 +1462,7 @@ namespace WHA_avac
             //test TimeSpan
             DateTime dt1 = Convert.ToDateTime("1996-01-01 00:00:00");
             DateTime dt20000101 = Convert.ToDateTime("1997-01-01 00:00:00");
-            setLogT((dt1-dt20000101).Days.ToString());
+            setLogT(-1,(dt1-dt20000101).Days.ToString());
             int dd = (dt1 - dt20000101).Days;
 
             //正则表达式有另一条规则，比懒惰／贪婪规则的优先级更高：最先开始的匹配拥有最高的优先权
@@ -1451,7 +1470,7 @@ namespace WHA_avac
             myMatch = (new Regex(reg)).Match("aaaaaaaaaaa333b");
             if (myMatch.Success)
             {
-                setLogT( myMatch.Groups[0].Value);
+                setLogT( -1, myMatch.Groups[0].Value);
             }
 
             //test string 2 DateTime
@@ -1460,21 +1479,21 @@ namespace WHA_avac
             DateTimeFormatInfo dtFormat = new DateTimeFormatInfo();
             dtFormat.ShortDatePattern = "yyyyMMMMd";
             DateTime dt = Convert.ToDateTime(strDt, dtFormat);
-            setLogT(dt.ToString());
+            setLogT(-1,dt.ToString());
 
             reg = @"(?<=style=""color:Black"" title="").*?(?= \d+"")";
             myMatch = (new Regex(reg)).Match("ent','5750')\" style=\"color:Black\" title=\"September 29\">29</a></td><td align=\"center\" ");
             if (myMatch.Success)
             {
-                setLogT( myMatch.Groups[0].Value);
+                setLogT( -1,myMatch.Groups[0].Value);
             }
-
-            setLogT(comboBox1.SelectedItem.ToString());
+            setLogT(-1,comboBox1.SelectedItem.ToString());
 
             gDays.Add("1 data");
             gDays.Add("2 data");
             gDays.Add("3 data");
-            setLogT(gDays.Last());
+            setLogT(-1,gDays.Last());
+            setLogT(-1,gDays[0]);
         }
 
         private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
@@ -1487,6 +1506,6 @@ namespace WHA_avac
 //选择类别时，是否不需要提交两次: 是，不需要.
 //直接post a inavailable date, could succeed?  不可以
 //不需要访问第一页？  如果不get首页，最终将返回英文预约页，且英文预约者在中文页重新申请，仍显示名额满；所以可跳过首页的GET和POST , 替换预约页
+//多线程处理多次点击
 
-//清理冗余代码、禁用测试单元
 //如果出现两个月的日期，能不翻页直接提交第二个月的最晚时间？

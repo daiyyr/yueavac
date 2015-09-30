@@ -105,7 +105,7 @@
             // 
             this.label3.AutoSize = true;
             this.label3.Font = new System.Drawing.Font("宋体", 9F);
-            this.label3.Location = new System.Drawing.Point(134, 325);
+            this.label3.Location = new System.Drawing.Point(134, 427);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(113, 12);
             this.label3.TabIndex = 8;
@@ -117,7 +117,7 @@
             this.logT.Name = "logT";
             this.logT.ReadOnly = true;
             this.logT.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.ForcedVertical;
-            this.logT.Size = new System.Drawing.Size(373, 175);
+            this.logT.Size = new System.Drawing.Size(373, 277);
             this.logT.TabIndex = 9;
             this.logT.Text = "";
             this.logT.TextChanged += new System.EventHandler(this.logT_TextChanged);
@@ -183,7 +183,7 @@
             // 
             // pictureBox1
             // 
-            this.pictureBox1.Location = new System.Drawing.Point(8, 224);
+            this.pictureBox1.Location = new System.Drawing.Point(8, 326);
             this.pictureBox1.Name = "pictureBox1";
             this.pictureBox1.Size = new System.Drawing.Size(194, 62);
             this.pictureBox1.TabIndex = 17;
@@ -191,16 +191,16 @@
             // 
             // textBox1
             // 
-            this.textBox1.Location = new System.Drawing.Point(208, 275);
+            this.textBox1.Location = new System.Drawing.Point(210, 357);
             this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(85, 21);
+            this.textBox1.Size = new System.Drawing.Size(115, 21);
             this.textBox1.TabIndex = 18;
             this.textBox1.TextChanged += new System.EventHandler(this.textBox1_TextChanged);
             // 
             // label5
             // 
             this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(208, 231);
+            this.label5.Location = new System.Drawing.Point(208, 333);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(143, 12);
             this.label5.TabIndex = 19;
@@ -208,22 +208,23 @@
             // 
             // button1
             // 
-            this.button1.Location = new System.Drawing.Point(306, 275);
+            this.button1.Location = new System.Drawing.Point(566, 419);
             this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(75, 23);
+            this.button1.Size = new System.Drawing.Size(83, 23);
             this.button1.TabIndex = 20;
             this.button1.Text = "重输验证码";
             this.button1.UseVisualStyleBackColor = true;
+            this.button1.Visible = false;
             this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
             // label6
             // 
             this.label6.AutoSize = true;
-            this.label6.Font = new System.Drawing.Font("宋体", 20F);
+            this.label6.Font = new System.Drawing.Font("宋体", 18F);
             this.label6.ForeColor = System.Drawing.Color.Red;
-            this.label6.Location = new System.Drawing.Point(12, 289);
+            this.label6.Location = new System.Drawing.Point(4, 391);
             this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(174, 27);
+            this.label6.Size = new System.Drawing.Size(154, 24);
             this.label6.TabIndex = 21;
             this.label6.Text = "请输入验证码";
             this.label6.Visible = false;
@@ -231,11 +232,12 @@
             // label7
             // 
             this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(207, 255);
+            this.label7.Location = new System.Drawing.Point(399, 419);
             this.label7.Name = "label7";
             this.label7.Size = new System.Drawing.Size(161, 12);
             this.label7.TabIndex = 22;
             this.label7.Text = "若输入有误请点击下面的按钮";
+            this.label7.Visible = false;
             // 
             // button2
             // 
@@ -273,7 +275,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(393, 340);
+            this.ClientSize = new System.Drawing.Size(390, 442);
             this.Controls.Add(this.label8);
             this.Controls.Add(this.comboBox1);
             this.Controls.Add(this.button2);
