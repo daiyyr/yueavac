@@ -22,7 +22,7 @@ namespace WHA_avac
         string reg = "";
         Match myMatch;
         int gThreadNo = -1;
-        int waitForEnterVerificationCode = -1;
+        int gThreadNoOfVerificationCodeToBeEntered = -1;
 
         List<string> gViewstate = new List<string>();
         List<string> gEventvalidation = new List<string>();
@@ -40,7 +40,7 @@ namespace WHA_avac
                gFirstName = "jinping",
                gLastName = "xi",
                gMobile = "139034000",
-               gPassport = "E72777483",
+               gPassport = "E7229933",
                gSTDCode = "0533";
         List<String> gDays = new List<string>(); //5721 means 2015.08.31, the number of days since 2000.01.01
                                                  //所有线程共同管理一个天数表，只有第一个获得天数页的线程可以添加可用天数
@@ -815,15 +815,27 @@ namespace WHA_avac
             {
                 cCodeGuid = myMatch.Groups[0].Value;
             }
-            while (waitForEnterVerificationCode>=0)
+            lock (pictureBox1)
             {
-                Thread.Sleep(50);
-            }
-
-            waitForEnterVerificationCode = threadNo;
-            if (textBox1.InvokeRequired)
-            {
-                delegate2 sl = new delegate2(delegate()
+                while (gThreadNoOfVerificationCodeToBeEntered != -1)
+                {
+                    Thread.Sleep(50);
+                }
+                gThreadNoOfVerificationCodeToBeEntered = threadNo;
+                if (textBox1.InvokeRequired)
+                {
+                    delegate2 sl = new delegate2(delegate()
+                    {
+                        pictureBox1.ImageLocation = @"https://www.visaservices.org.in/DIAC-China-Appointment/AppScheduling/MyCaptchaImage.aspx?guid=" + cCodeGuid;
+                        textBox1.Text = "";
+                        textBox1.ReadOnly = false;
+                        textBox1.Focus();
+                        label6.Text = "线程" + threadNo.ToString() + ":请输入验证码";
+                        label6.Visible = true;
+                    });
+                    textBox1.Invoke(sl);
+                }
+                else
                 {
                     pictureBox1.ImageLocation = @"https://www.visaservices.org.in/DIAC-China-Appointment/AppScheduling/MyCaptchaImage.aspx?guid=" + cCodeGuid;
                     textBox1.Text = "";
@@ -831,18 +843,9 @@ namespace WHA_avac
                     textBox1.Focus();
                     label6.Text = "线程" + threadNo.ToString() + ":请输入验证码";
                     label6.Visible = true;
-                });
-                textBox1.Invoke(sl);
+                }
             }
-            else
-            {
-                pictureBox1.ImageLocation = @"https://www.visaservices.org.in/DIAC-China-Appointment/AppScheduling/MyCaptchaImage.aspx?guid=" + cCodeGuid;
-                textBox1.Text = "";
-                textBox1.ReadOnly = false;
-                textBox1.Focus();
-                label6.Text = "线程" + threadNo.ToString() + ":请输入验证码";
-                label6.Visible = true;
-            }
+            
 
             return 1;
         }
@@ -923,15 +926,27 @@ namespace WHA_avac
                 {
                     cCodeGuid = myMatch.Groups[0].Value;
                 }
-
-                while (waitForEnterVerificationCode>=0)
+                lock (pictureBox1)
                 {
-                    Thread.Sleep(50);
-                }
-                waitForEnterVerificationCode = threadNo;
-                if (textBox1.InvokeRequired)
-                {
-                    delegate2 sl = new delegate2(delegate()
+                    while (gThreadNoOfVerificationCodeToBeEntered != -1)
+                    {
+                        Thread.Sleep(50);
+                    }
+                    gThreadNoOfVerificationCodeToBeEntered = threadNo;
+                    if (textBox1.InvokeRequired)
+                    {
+                        delegate2 sl = new delegate2(delegate()
+                        {
+                            pictureBox1.ImageLocation = @"https://www.visaservices.org.in/DIAC-China-Appointment/AppScheduling/MyCaptchaImage.aspx?guid=" + cCodeGuid;
+                            textBox1.Text = "";
+                            textBox1.ReadOnly = false;
+                            textBox1.Focus();
+                            label6.Text = "线程" + threadNo.ToString() + ":请输入验证码";
+                            label6.Visible = true;
+                        });
+                        textBox1.Invoke(sl);
+                    }
+                    else
                     {
                         pictureBox1.ImageLocation = @"https://www.visaservices.org.in/DIAC-China-Appointment/AppScheduling/MyCaptchaImage.aspx?guid=" + cCodeGuid;
                         textBox1.Text = "";
@@ -939,19 +954,8 @@ namespace WHA_avac
                         textBox1.Focus();
                         label6.Text = "线程" + threadNo.ToString() + ":请输入验证码";
                         label6.Visible = true;
-                    });
-                    textBox1.Invoke(sl);
+                    }
                 }
-                else
-                {
-                    pictureBox1.ImageLocation = @"https://www.visaservices.org.in/DIAC-China-Appointment/AppScheduling/MyCaptchaImage.aspx?guid=" + cCodeGuid;
-                    textBox1.Text = "";
-                    textBox1.ReadOnly = false;
-                    textBox1.Focus();
-                    label6.Text = "线程" + threadNo.ToString() + ":请输入验证码";
-                    label6.Visible = true;
-                }
-            
                 return -2;
             }
 
@@ -1041,37 +1045,50 @@ namespace WHA_avac
         
         public int pickDate(int threadNo)
         {
+            string respHtml;
             while(true)
             {
                 setLogT(threadNo, "pickDate..");
-
-                if (gDays.Count == 0)
+                lock (gDays)
                 {
-                    setLogT(threadNo, gVACity_raw + ", " + (gCategory.Equals("17") ? "working and holiday, " : "general") + ", 名额已满, 请尝试其它预约地点");
-                    return -1;
+                    if (gDays.Count == 0)
+                    {
+                        setLogT(threadNo, gVACity_raw + ", " + (gCategory.Equals("17") ? "working and holiday, " : "general") + ", 名额已满, 请尝试其它预约地点");
+                        return -1;
+                    }
+                    respHtml = weLoveYue(
+                        threadNo,
+                        "https://www.visaservices.org.in/DIAC-China-Appointment/AppScheduling/AppSchedulingInterviewDate.aspx",
+                        "POST",
+                        "https://www.visaservices.org.in/DIAC-China-Appointment/AppScheduling/AppSchedulingVisaCategory.aspx",
+                        false,
+                        "__EVENTTARGET=ctl00%24plhMain%24cldAppointment&__EVENTARGUMENT="
+                        + gDays.Last()
+                        + "&__VIEWSTATE=" + gViewstate[threadNo]
+                        + "&____Ticket=" + gTicket[threadNo].ToString()
+                        + "&__EVENTVALIDATION=" + gEventvalidation[threadNo]
+                        );
+                    gTicket[threadNo]++;
                 }
-
-                string respHtml = weLoveYue(
-                    threadNo,
-                    "https://www.visaservices.org.in/DIAC-China-Appointment/AppScheduling/AppSchedulingInterviewDate.aspx",
-                    "POST",
-                    "https://www.visaservices.org.in/DIAC-China-Appointment/AppScheduling/AppSchedulingVisaCategory.aspx",
-                    false,
-                    "__EVENTTARGET=ctl00%24plhMain%24cldAppointment&__EVENTARGUMENT="
-                    + gDays.Last()
-                    + "&__VIEWSTATE=" + gViewstate[threadNo]
-                    + "&____Ticket=" + gTicket[threadNo].ToString()
-                    + "&__EVENTVALIDATION=" + gEventvalidation[threadNo]
-                    );
-                gTicket[threadNo]++;
-
                 reg = @"style=""color:Black"" title="".*?"">\d+</a></td><td align=""center""";
                 myMatch = (new Regex(reg)).Match(respHtml);
                 if (myMatch.Success)
                 {
-                    setLogT(threadNo, "所选日期异常，选择前一个可用天");
-                    gDays.RemoveAt(gDays.Count - 1);
-                    continue;
+                    lock (gDays)
+                    {
+                        if (gDays.Count > 0)
+                        {
+                            setLogT(threadNo, "所选日期异常，选择前一个可用天");
+                            gDays.RemoveAt(gDays.Count - 1);
+                            continue;
+                        }
+                        else
+                        {
+                            setLogT(threadNo, gVACity_raw + ", " + (gCategory.Equals("17") ? "working and holiday, " : "general") + ", 名额已满, 请尝试其它预约地点");
+                            return -1;
+                        }
+                        
+                    }
                 }
 
 
@@ -1122,10 +1139,22 @@ namespace WHA_avac
             }
             else
             {
-                setLogT(threadNo, "所选时间异常, 重新提交前一个可用日期");
-                gDays.RemoveAt(gDays.Count - 1);
-                pickDate(threadNo);
-                pickTime(threadNo);
+                lock (gDays)
+                {
+                    if (gDays.Count > 0)
+                    {
+                        setLogT(threadNo, "所选时间异常, 重新提交前一个可用日期");
+                        gDays.RemoveAt(gDays.Count - 1);
+                        pickDate(threadNo);
+                        pickTime(threadNo);
+                    }
+                    else
+                    {
+                        setLogT(threadNo, gVACity_raw + ", " + (gCategory.Equals("17") ? "working and holiday, " : "general") + ", 名额已满, 请尝试其它预约地点");
+                        return -1;
+                    }
+                }
+                
             }
 
             string result = respHtml
@@ -1254,7 +1283,7 @@ namespace WHA_avac
 
         public void autoT2(int threadNo)
         {
-            waitForEnterVerificationCode = -1;
+            gThreadNoOfVerificationCodeToBeEntered = -1;
             int fillInResult = fillInDetails(threadNo);
             if (fillInResult == -2)//incorrect vervification code
             {
@@ -1283,24 +1312,26 @@ namespace WHA_avac
 
         private void autoB_Click(object sender, EventArgs e)
         {
-            gThreadNo++;
-            gViewstate.Add("");
-            gEventvalidation.Add("");
-            gVerificationCode.Add("");
-            gCookieContainer.Add(null);
-            gTicket.Add(1);
+            lock (autoB)
+            {
+                gThreadNo++;
+                gViewstate.Add("");
+                gEventvalidation.Add("");
+                gVerificationCode.Add("");
+                gCookieContainer.Add(null);
+                gTicket.Add(1);
 
-            ThreadStart starter = delegate { autoT(gThreadNo); };
-            new Thread(starter).Start();
+                ThreadStart starter = delegate { autoT(gThreadNo); };
+                new Thread(starter).Start();
 
-            //使用线程池
-            //WaitCallback callback = delegate(object state) { autoT((int)state); };
-            //ThreadPool.QueueUserWorkItem(callback, gThreadNo);
+                //使用线程池
+                //WaitCallback callback = delegate(object state) { autoT((int)state); };
+                //ThreadPool.QueueUserWorkItem(callback, gThreadNo);
 
-            //使用ParameterizedThreadStart
-            //Thread tt = new Thread(new ParameterizedThreadStart(autoT));
-            //t.Start(gThreadNo);
-
+                //使用ParameterizedThreadStart
+                //Thread tt = new Thread(new ParameterizedThreadStart(autoT));
+                //t.Start(gThreadNo);
+            }
         }
 
         private void rate_KeyPress(object sender, KeyPressEventArgs e)
@@ -1412,7 +1443,7 @@ namespace WHA_avac
         {
             if (textBox1.Text.Length == 5)
             {
-                gVerificationCode[waitForEnterVerificationCode] = textBox1.Text.Substring(0, 5);
+                gVerificationCode[gThreadNoOfVerificationCodeToBeEntered] = textBox1.Text.Substring(0, 5);
                 if (textBox1.InvokeRequired)
                 {
                     delegate2 sl = new delegate2(delegate()
@@ -1428,7 +1459,7 @@ namespace WHA_avac
                     label6.Visible = false;
                 }
 
-                ThreadStart starter = delegate { autoT2(waitForEnterVerificationCode); };
+                ThreadStart starter = delegate { autoT2(gThreadNoOfVerificationCodeToBeEntered); };
                 new Thread(starter).Start();
             }
             
@@ -1508,4 +1539,5 @@ namespace WHA_avac
 //不需要访问第一页？  如果不get首页，最终将返回英文预约页，且英文预约者在中文页重新申请，仍显示名额满；所以可跳过首页的GET和POST , 替换预约页
 //多线程处理多次点击
 
+//自动识别验证码
 //如果出现两个月的日期，能不翻页直接提交第二个月的最晚时间？
