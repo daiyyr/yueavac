@@ -17,7 +17,7 @@ namespace WHA_avac
     public partial class Form1 : Form
     {
 
-        bool debug = true;
+        bool debug = false;
 
         string reg = "";
         Match myMatch;
@@ -40,7 +40,7 @@ namespace WHA_avac
                gFirstName = "jinping",
                gLastName = "xi",
                gMobile = "139034000",
-               gPassport = "E7229933",
+               gPassport = "E7220033",
                gSTDCode = "0533";
         List<String> gDays = new List<string>(); //5721 means 2015.08.31, the number of days since 2000.01.01
                                                  //所有线程共同管理一个天数表，只有第一个获得天数页的线程可以添加可用天数
