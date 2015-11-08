@@ -19,6 +19,7 @@ namespace WHA_avac
 
         bool debug = false;
 
+        bool FastMode = true;
         string reg = "";
         Match myMatch;
         int gThreadNo = -1;
@@ -31,20 +32,284 @@ namespace WHA_avac
         List<int> gTicket = new List<int>();
 
 
-        string gVACity_raw = "beijing",     //  30 for guangzhou;29 for shanghai;28 for beijing
+        /*
+
+
+        //  30 for guangzhou;29 for shanghai;28 for beijing
+        string gVACity_raw = "guangzhou",         // 递签地点  beijing  shanghai  guangzhou  chengdu
+               gTitle = "MR.",                  //  称呼  MR.  或   MS.
+               gContactNumber = "1234567",      // 固定电话
+               gEmail = "33333333333@qq.com",   //邮箱
+               gFirstName = "jinping",          //护照上的名
+               gLastName = "xi",                //护照上的姓
+               gMobile = "139034000",           //手机
+               gPassport = "E722330033",          //护照号
+               gSTDCode = "0533",                //区号
+
+        */
+
+        /*
+        //淘寶訂單號： 956505835532653
+        //qq號   379318693
+        string gVACity_raw = "chengdu",         // 递签地点  beijing  shanghai  guangzhou  chengdu
+                gTitle = "MS.",                  //  称呼  MR.  或   MS.
+                gContactNumber = "86950176",      // 固定电话
+                gEmail = "247418742@qq.com",   //邮箱
+                gFirstName = "zhengzheng",          //护照上的名
+                gLastName = "Liu",                //护照上的姓
+                gMobile = "15823548228",           //手机
+                gPassport = "G53479063",          //护照号
+                gSTDCode = "023",                //区号
+        */
+
+        /*
+                //淘寶訂單號：955465021629660
+            //qq號:122090260
+
+       string gVACity_raw = "shanghai",         // 递签地点  beijing  shanghai  guangzhou  chengdu
+               gTitle = "MS.",                  //  称呼  MR.  或   MS.
+               gContactNumber = "02150835967",      // 固定电话
+               gEmail = "122090260@qq.com",   //邮箱
+               gFirstName = "XI",          //护照上的名
+               gLastName = "YU",                //护照上的姓
+               gMobile = "18521328802",           //手机
+               gPassport = "E49972259",          //护照号
+               gSTDCode = "021",                //区号
+        */
+
+        /*
+               //淘寶訂單號 955308927879280
+//QQ:452763948
+       string gVACity_raw = "chengdu",         // 递签地点  beijing  shanghai  guangzhou  chengdu
+               gTitle = "Ms.",                  //  称呼  MR.  或   MS.
+               gContactNumber = "68615010",      // 固定电话
+               gEmail = "452763948@qq.com",   //邮箱
+               gFirstName = "ZIFENG",          //护照上的名
+               gLastName = "LI",                //护照上的姓
+               gMobile = "13540413772",           //手机
+               gPassport = "E20400166 ",          //护照号
+               gSTDCode = "028",                //区号
+        */
+
+        /*
+               //淘寶訂單號：1051264035605579
+//qq號 273134980
+
+       string gVACity_raw = "guangzhou",         // 递签地点  beijing  shanghai  guangzhou  chengdu
+               gTitle = "MR.",                  //  称呼  MR.  或   MS.
+               gContactNumber = "5702708",      // 固定电话
+               gEmail = "273134980@qq.com",   //邮箱
+               gFirstName = "rong",          //护照上的名
+               gLastName = "zhou",                //护照上的姓
+               gMobile = "15889722857",           //手机
+               gPassport = "G61601285",          //护照号
+               gSTDCode = "0716",                //区号
+
+        */
+
+        /*
+        //淘寶訂單號：1063546088353568
+        //qq號：2469874685
+
+        string gVACity_raw = "shanghai",         // 递签地点  beijing  shanghai  guangzhou  chengdu
+                gTitle = "MS.",                  //  称呼  MR.  或   MS.
+                gContactNumber = "123456",      // 固定电话
+                gEmail = "wstcymhd0@163.com",   //邮箱
+                gFirstName = "LING",          //护照上的名
+                gLastName = "HUANG",                //护照上的姓
+                gMobile = "13761700617",           //手机
+                gPassport = "E12833426",          //护照号
+                gSTDCode = "021",                //区号
+
+
+        */
+        /*
+        //淘寶訂單號：1148125940851538
+        //qq號 498816363
+
+        string gVACity_raw = "shanghai",         // 递签地点  beijing  shanghai  guangzhou  chengdu
+                gTitle = "MR.",                  //  称呼  MR.  或   MS.
+                gContactNumber = "88887777",      // 固定电话
+                gEmail = "498816363@qq.com",   //邮箱
+                gFirstName = "WEI",          //护照上的名
+                gLastName = "XU",                //护照上的姓
+                gMobile = "13641465710",           //手机
+                gPassport = "E11069671",          //护照号
+                gSTDCode = "0793",                //区号
+
+        */
+
+        /*
+        //淘寶訂單號： 1126995719039860
+        //qq號   741326750
+
+        string gVACity_raw = "guangzhou",         // 递签地点  beijing  shanghai  guangzhou  chengdu
+                gTitle = "MS.",                  //  称呼  MR.  或   MS.
+                gContactNumber = "4588956",      // 固定电话
+                gEmail = "741326750@qq.com",   //邮箱
+                gFirstName = "MIN",          //护照上的名
+                gLastName = "ZHOU",                //护照上的姓
+                gMobile = "15586278026",           //手机
+                gPassport = "E47732503",          //护照号
+                gSTDCode = "0728",                //区号
+
+
+        */
+
+        /*
+        //淘寶訂單號：
+        //qq號:1210034996
+
+        string gVACity_raw = "guangzhou",         // 递签地点  beijing  shanghai  guangzhou  chengdu
+                gTitle = "MS",                  //  称呼  MR.  或   MS.
+                gContactNumber = "5830028",      // 固定电话
+                gEmail = "1210034996@qq.com",   //邮箱
+                gFirstName = "HAITING",          //护照上的名
+                gLastName = "LUO",                //护照上的姓
+                gMobile = "13828580195",           //手机
+                gPassport = "E01154605",          //护照号
+                gSTDCode = "0763",                //区号
+
+        */
+
+        /*
+        //淘寶訂單號: 1071798661328027
+        //qq號: 425668637
+        string gVACity_raw = "shanghai", // 递签地点
+        gTitle = "MS.", // 称呼
+        gContactNumber = "88231001", // 固定电话 
+        gEmail = "376853981@qq.com", //邮箱 
+        gFirstName = "WENLIN", //护照上的名 
+        gLastName = "DAI", //护照上的姓 
+        gMobile = "15088746122", //手机 
+        gPassport = "E07173229", //护照号 
+        gSTDCode = "0510", //区号
+
+
+        */
+        /*
+        //淘寶訂單號：
+        //qq號 419233054
+
+        string gVACity_raw = "shanghai",         // 递签地点  beijing  shanghai  guangzhou  chengdu
+                gTitle = "MR.",                  //  称呼  MR.  或   MS.
+                gContactNumber = "56123456",      // 固定电话
+                gEmail = "yangshujun1208@163.com",   //邮箱
+                gFirstName = "SHUJUN",          //护照上的名
+                gLastName = "YANG",                //护照上的姓
+                gMobile = "18616148845",           //手机
+                gPassport = "E44459231",          //护照号
+                gSTDCode = "021",                //区号
+
+
+        */
+
+        /*
+        //淘寶訂單號：954843972968557
+        //qq號:77529501
+
+        string gVACity_raw = "guangzhou",         // 递签地点  beijing  shanghai  guangzhou  chengdu
+                gTitle = "MR.",                  //  称呼  MR.  或   MS.
+                gContactNumber = "1234567",      // 固定电话
+                gEmail = "77529501@qq.com",   //邮箱
+                gFirstName = "LIWEI",          //护照上的名
+                gLastName = "ZHANG",                //护照上的姓
+                gMobile = "18998332267",           //手机
+                gPassport = "E39768052",          //护照号
+                gSTDCode = "0533",                //区号
+
+        */
+
+        /*
+        //淘寶訂單號：1217744065626679
+        //qq號：345710523
+
+        string gVACity_raw = "guangzhou",         // 递签地点 guangzhou  
+                gTitle = "MS.",                  //  称呼 
+                gContactNumber = "22981991",      // 固定电话
+                gEmail = "345710523@qq.com",   //邮箱 
+                gFirstName = "jiali",          //护照上的名
+                gLastName = "zhang",                //护照上的姓
+                gMobile = "15999819140",           //手机
+                gPassport = "E47426786",          //护照号
+                gSTDCode = "0769",                //区号
+        */
+        /*
+        //淘寶訂單號：
+        //qq號 25730015
+
+        string gVACity_raw = "shanghai",         // 递签地点  beijing  shanghai  guangzhou  chengdu
+                gTitle = "MR.",                  //  称呼  MR.  或   MS.
+                gContactNumber = "87863326",      // 固定电话
+                gEmail = "25730015@qq.com",   //邮箱
+                gFirstName = "JIAN",          //护照上的名
+                gLastName = "LIN",                //护照上的姓
+                gMobile = "15980612449",           //手机
+                gPassport = "E54076262",          //护照号
+                gSTDCode = "0591",                //区号
+        */
+        /*
+        //淘寶訂單號：
+        //qq號 251620727
+
+        string gVACity_raw = "beijing",         // 递签地点  beijing  shanghai  guangzhou  chengdu
+                gTitle = "MR.",                  //  称呼  MR.  或   MS.
+                gContactNumber = "84784700",      // 固定电话
+                gEmail = "tianyongzhe16@sina.com",   //邮箱
+                gFirstName = "CHUNYONG",          //护照上的名
+                gLastName = "YIN",                //护照上的姓
+                gMobile = "18910580621",           //手机
+                gPassport = "G35290903",          //护照号
+                gSTDCode = "010",                //区号
+
+        */
+
+        //淘寶訂單號：beyondlolita01
+        //qq號 252476094
+
+        /*
+        string gVACity_raw = "chengdu",         // 递签地点  beijing  shanghai  guangzhou  chengdu
+                gTitle = "MS.",                  //  称呼  MR.  或   MS.
+                gContactNumber = "7077888",      // 固定电话
+                gEmail = "lolita-601@hotmail.com",   //邮箱
+                gFirstName = "NINGYI",          //护照上的名
+                gLastName = "LIU",                //护照上的姓
+                gMobile = "15520537297",           //手机
+                gPassport = "G37965867",          //护照号
+                gSTDCode = "0816",                //区号
+
+        */
+
+        //淘寶訂單號：1117344195511596
+        //qq號 1435995917
+
+        string gVACity_raw = "guangzhou",         // 递签地点  beijing  shanghai  guangzhou  chengdu
+                gTitle = "MISS.",                  //  称呼  MR.  或   MS.
+                gContactNumber = "34876747",      // 固定电话
+                gEmail = "1435995917@qq.com",   //邮箱
+                gFirstName = "yue",          //护照上的名
+                gLastName = "wang",                //护照上的姓
+                gMobile = "13826093210",           //手机
+                gPassport = "G43554059",          //护照号
+                gSTDCode = "020",                //区号
+
+
+
+
+
                gVACity = "",
-               gCategory = "from combobox",          //13 for general, 17 for work and holiday
-               gTitle = "MR.",
-               gContactNumber = "05923333433",
-               gEmail = "3fe3333@qq.com",
-               gFirstName = "jinping",
-               gLastName = "xi",
-               gMobile = "139034000",
-               gPassport = "E7220033",
-               gSTDCode = "0533";
+               gCategory = "from combobox";          //13 for general, 17 for work and holiday;
+
+
+
+
+
         List<String> gDays = new List<string>(); //5721 means 2015.08.31, the number of days since 2000.01.01
                                                  //所有线程共同管理一个天数表，只有第一个获得天数页的线程可以添加可用天数
                                                  //默认选择最晚日期
+
+
+
         string gTime = "02";    //02~24, 15分钟一个时段，某个时段满了则后面的时段号均-1
                                 //例如
                                 /**
@@ -77,6 +342,53 @@ namespace WHA_avac
   //      string user = "dudeea";
   //      string password = "Dd123456";
 
+
+        public Form1()
+        {
+            InitializeComponent();
+
+            comboBox2.SelectedIndex = 0; //fast
+            FastMode = true;
+
+            if (debug)
+            {
+                this.ClientSize = new System.Drawing.Size(950, 600);
+                comboBox1.SelectedIndex = 1; //normal
+                button2.Visible = true;
+                testLog.Visible = true;
+            }
+            else
+            {
+                comboBox1.SelectedIndex = 0; //work and holiday 
+                comboBox1.Items.RemoveAt(1);
+            }
+
+            gCategory = comboBox1.SelectedIndex == 0 ? "17" : "13";    //13 for general, 17 for work and holiday
+
+            if (gVACity_raw.Equals("guangzhou"))
+            {
+                gVACity = "30";
+            }
+            else if (gVACity_raw.Equals("shanghai"))
+            {
+                gVACity = "29";
+            }
+            else if (gVACity_raw.Equals("beijing"))
+            {
+                gVACity = "28";
+            }else{
+                gVACity = "31";
+            }
+            gEmail = gEmail.Replace("@", "%40");
+            if (File.Exists(System.Environment.CurrentDirectory + "\\" + "urlList"))
+            {
+                string[] lines = File.ReadAllLines(System.Environment.CurrentDirectory + "\\" + "urlList");
+                foreach (string line in lines)
+                {
+                    urlList.Items.Add(line);
+                }
+            }
+        }
 
         public delegate void setLog(int threadNo, string str1);
         public void setLogT(int threadNo, string s)
@@ -148,42 +460,7 @@ namespace WHA_avac
             }
         }
 
-        public Form1()
-        {
-            InitializeComponent();
-
-            if (debug)
-            {
-                this.ClientSize = new System.Drawing.Size(950, 600);
-                comboBox1.SelectedIndex = 1; //normal
-                button2.Visible = true;
-                testLog.Visible = true;
-            }
-            else {
-                comboBox1.SelectedIndex = 0; //work and holiday 
-            }
-            
-
-            if (gVACity_raw.Equals("guangzhou"))
-            {
-                gVACity = "30";
-            }
-            else if (gVACity_raw.Equals("shanghai"))
-            {
-                gVACity = "29";
-            }else{
-                gVACity = "28";
-            }
-            gEmail = gEmail.Replace("@","%40");
-            if (File.Exists(System.Environment.CurrentDirectory + "\\" + "urlList"))
-            {
-                string[] lines = File.ReadAllLines(System.Environment.CurrentDirectory + "\\" + "urlList");
-                foreach (string line in lines)
-                {
-                    urlList.Items.Add(line);
-                }
-            }
-        }
+      
         /*
         public void alarm()
         {
@@ -618,7 +895,7 @@ namespace WHA_avac
         {
             string respHtml;
 
-
+            
             setLogT(threadNo, "get first page..");
 
             respHtml = weLoveYue(
@@ -644,7 +921,7 @@ namespace WHA_avac
 
             }
 
-
+            
 
             setLogT(threadNo, "make a pointment..");
             respHtml = weLoveYue(
@@ -688,18 +965,12 @@ namespace WHA_avac
                 "POST",
                 "https://www.visaservices.org.in/DIAC-China-Appointment/AppScheduling/AppWelcome.aspx?p=Gta39GFZnstZVCxNVy83zTlkvzrXE95fkjmft28XjNg%3d",
                 false,
-                "__VIEWSTATE=U8AJVYNixXRfz4bH8v8%2F0vyB2azTOxRhlu62TVP4Amy7PraT6FvK3uGzIJqpRnwHPLQBDjit0Tjqobj9c3TrNCXUsyOncX0WxstNd60kTj8"
-                + "%2Bd2aNdNAHhWwFQbihaPgQt5lqYnaTge7vlpLbWpGs1joqc1zDofYD9mVpEFI%2FO2z%2Bek3MI8aSix%2FDSg5erl%2B8uRJ1JwBoHBwR2so02sjNNZGjkrCqF8m6WqbVdzjMAnEEhrSuy7sSn"
-                + "%2Fpfy54zWWFpQpBwD1OXAtltLg1C%2FT5KV5tpWKQHxmuq4JXjIQ4EPdT%2BSZFl9taV2DiZDT3X0kkl%2FyxDYRbAo0OU88hhWUeJf"
-                + "%2BMdRSC7C6y3pzBtisn2c10P9Dk6t%2FZxewskMJAIsnN5a7cAQr3%2BVEWgDVMdZBow0Ylr7q6CFokZaUVebCMLBTFOnvnI9Zjbxg"
-                + "%3D%3D&ctl00%24plhMain%24cbo"
-                + "VAC=" + gVACity
+                "__VIEWSTATE="+gViewstate[threadNo]
+                + "&ctl00%24plhMain%24cboVAC=" + gVACity
                 + "&ctl00%24plhMain%24btnSubmit=%E6%8F%90%E4%BA%A4&ctl00%24plhMain%24hdnValidation1"
                 + "=%E8%AF%B7%E9%80%89%E6%8B%A9%EF%BC%9A&ctl00%24plhMain%24hdnValidation2=%E7%AD%BE%E8%AF%81%E7%94%B3%E8"
                 + "%AF%B7%E4%B8%AD%E5%BF%83&ctl00%24plhMain%24hdnValidation3=%E5%B1%85%E4%BD%8F%E5%9B%BD&____Ticket="+gTicket[threadNo].ToString()
-                +"&__EVENTVALIDATION"
-                + "=Vl39F6qwZOICJpTa9PcH0gV%2FyeRGOfg5uQqROs1LRKtDZsxgCLg9LzkK%2F0bKajvKLYu88iUHiiiQQjV%2FynffMgplscVinn0GMf5vgACt66c"
-                + "%3D"
+                + "&__EVENTVALIDATION=" + gEventvalidation[threadNo]
                 );
             gTicket[threadNo]++;
 
@@ -1256,9 +1527,35 @@ namespace WHA_avac
  */
         public void autoT(int threadNo)
         {
+
+            if (FastMode)
+            {
+                //create(threadNo); 
+                //not neccessary; enable ->Chinese letter; disable -> English letter; daiyyr
+
+                // we need gViewstate and gEventvalidation
+
+                if (gVACity_raw == "chengdu")
+                {
+                    create(threadNo);//do not get chengdu's chinese letter;
+                }
+
+                else
+                {
+                    gViewstate[threadNo] = "U8AJVYNixXRfz4bH8v8%2F0vyB2azTOxRhlu62TVP4Amy7PraT6FvK3uGzIJqpRnwHPLQBDjit0Tjqobj9c3TrNCXUsyOncX0WxstNd60kTj8"
+    + "%2Bd2aNdNAHhWwFQbihaPgQt5lqYnaTge7vlpLbWpGs1joqc1zDofYD9mVpEFI%2FO2z%2Bek3MI8aSix%2FDSg5erl%2B8uRJ1JwBoHBwR2so02sjNNZGjkrCqF8m6WqbVdzjMAnEEhrSuy7sSn5sx2JPCAPELzGcgvK7ymAF"
+    + "%2Fo4FpAIw21AUJdpao36ei44Jb1nWNTSJ%2BWxOVFDomPZ3QwsQGZ8V%2BNoTLnINI7n3TJBDIMEQ2yLzYp8ff%2FTZFwPwHxGkD8FQNKvvpT0tuARNasi"
+    + "%2BUtaHEQJKlxEKI7aOE6Ldav8mq7mX5%2BAjISf5kh2%2BYh%2F1stSQsvqaMa%2BbypFtiIgsf62vL4PtlFLnMFoI%3D";
+                    gEventvalidation[threadNo] = "vKas72hy5TX%2FBf2mHBuDBkov7sMsGb6ZXWrSY3QCgqt7tZc0ZpUJ50UIBDWC87xlyhZbv9pP0H8EMLWmGiAMFbVM3G%2Bx8KLMuSycqeWcdbQ44qJcqdM1qA%3D%3D";
+                }
+            }
+
+            else    //safe
+            {
+                create(threadNo); 
+            }
             
-            //create();
-            //not neccessary; enable ->Chinese letter; disable -> English letter; daiyyr
+
 
 
             selectLocation(threadNo);
@@ -1530,6 +1827,11 @@ namespace WHA_avac
         private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
         {
             gCategory = comboBox1.SelectedIndex == 0 ? "17" : "13";    //13 for general, 17 for work and holiday
+        }
+
+        private void comboBox2_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            FastMode = comboBox1.SelectedIndex == 0 ? true : false;    //13 for general, 17 for work and holiday
         }
     }
 }
