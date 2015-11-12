@@ -280,6 +280,7 @@ namespace WHA_avac
 
         */
 
+        /*
         //淘寶訂單號：1117344195511596
         //qq號 1435995917
 
@@ -292,6 +293,76 @@ namespace WHA_avac
                 gMobile = "13826093210",           //手机
                 gPassport = "G43554059",          //护照号
                 gSTDCode = "020",                //区号
+
+        */
+
+        //淘寶訂單號：1071539876411545
+//qq號648949762
+        /*
+       string gVACity_raw = "shanghai",         // 递签地点   shanghai 
+               gTitle = "MR.",                  //  称呼  MR. 
+               gContactNumber = "31278780",      // 固定电话 31278780
+               gEmail = "648949762@qq.com",   //邮箱648949762qq.com
+               gFirstName = "JIAMIN",          //护照上的名JIAMIN
+               gLastName = "GU",                //护照上的姓GU
+               gMobile = "15150100092",           //手机15150100092
+               gPassport = "E16776012",          //护照号E16776012
+               gSTDCode = "021",                //区号021
+
+        */
+
+
+        //淘寶訂單號：913989009445085
+        //qq號 324015680
+        /*
+        string gVACity_raw = "chengdu",         // 递签地点  beijing  shanghai  guangzhou  chengdu
+                gTitle = "MR.",                  //  称呼  MR.  或   MS.
+                gContactNumber = "72732181",      // 固定电话
+                gEmail = "790222723@qq.com",   //邮箱
+                gFirstName = "KEYU",          //护照上的名
+                gLastName = "LI",                //护照上的姓
+                gMobile = "18482170359",           //手机
+                gPassport = "E57112004",          //护照号
+                gSTDCode = "028",                //区号
+        */
+
+        /*
+        string gVACity_raw = "beijing",         // 递签地点  beijing  shanghai  guangzhou  chengdu
+                gTitle = "MR.",                  //  称呼  MR.  或   MS.
+                gContactNumber = "123456",      // 固定电话
+                gEmail = "375079842@qq.com",   //邮箱
+                gFirstName = "YICHI",          //护照上的名
+                gLastName = "WANG",                //护照上的姓
+                gMobile = "13903511728",           //手机
+                gPassport = "G54155732",          //护照号
+                gSTDCode = "0351",                //区号
+
+        */
+        /*
+        string gVACity_raw = "beijing",         // 递签地点  beijing  shanghai  guangzhou  chengdu
+               gTitle = "MS.",                  //  称呼  MR.  或   MS.
+               gContactNumber = "123456",      // 固定电话
+               gEmail = "452763948@qq.com",   //邮箱
+               gFirstName = "ZIFENG",          //护照上的名
+               gLastName = "LI",                //护照上的姓
+               gMobile = "13540413772",           //手机
+               gPassport = "E20400166",          //护照号
+               gSTDCode = "028",                //区号
+        */
+
+        //淘寶訂單號：1117344195511596
+        //qq號 1435995917
+
+        string gVACity_raw = "shanghai",         // 递签地点  beijing  shanghai  guangzhou  chengdu
+                gTitle = "MISS.",                  //  称呼  MR.  或   MS.
+                gContactNumber = "34876747",      // 固定电话
+                gEmail = "1435995917@qq.com",   //邮箱
+                gFirstName = "yue",          //护照上的名
+                gLastName = "wang",                //护照上的姓
+                gMobile = "13826093210",           //手机
+                gPassport = "G43554059",          //护照号
+                gSTDCode = "020",                //区号
+
 
 
 
