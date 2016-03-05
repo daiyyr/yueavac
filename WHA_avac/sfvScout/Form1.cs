@@ -17,7 +17,7 @@ namespace WHA_avac
     public partial class Form1 : Form
     {
 
-        bool debug = false;
+        bool debug = true;
 
         bool FastMode = true;
         string reg = "";
@@ -285,7 +285,7 @@ namespace WHA_avac
         //qq號 1435995917
 
         string gVACity_raw = "guangzhou",         // 递签地点  beijing  shanghai  guangzhou  chengdu
-                gTitle = "MISS.",                  //  称呼  MR.  或   MS.
+                gTitle = "MS.",                  //  称呼  MR.  或   MS.
                 gContactNumber = "34876747",      // 固定电话
                 gEmail = "1435995917@qq.com",   //邮箱
                 gFirstName = "yue",          //护照上的名
@@ -348,13 +348,13 @@ namespace WHA_avac
                gMobile = "13540413772",           //手机
                gPassport = "E20400166",          //护照号
                gSTDCode = "028",                //区号
-        */
+        
 
         //淘寶訂單號：1117344195511596
         //qq號 1435995917
 
         string gVACity_raw = "shanghai",         // 递签地点  beijing  shanghai  guangzhou  chengdu
-                gTitle = "MISS.",                  //  称呼  MR.  或   MS.
+                gTitle = "MS.",                  //  称呼  MR.  或   MS.
                 gContactNumber = "34876747",      // 固定电话
                 gEmail = "1435995917@qq.com",   //邮箱
                 gFirstName = "yue",          //护照上的名
@@ -362,9 +362,20 @@ namespace WHA_avac
                 gMobile = "13826093210",           //手机
                 gPassport = "G43554059",          //护照号
                 gSTDCode = "020",                //区号
+        */
 
 
-
+        //淘寶訂單號：1117344195511596
+        //qq號 1435995917
+        string gVACity_raw = "chengdu",         // 递签地点  beijing  shanghai  guangzhou  chengdu
+                gTitle = "MS.",                  //  称呼  MR.  或   MS.
+                gContactNumber = "64313881",      // 固定电话
+                gEmail = "603133372@qq.com",   //邮箱
+                gFirstName = "sddfasdf",          //护照上的名
+                gLastName = "aefda",                //护照上的姓
+                gMobile = "18513603543",           //手机
+                gPassport = "E432543539",          //护照号
+                gSTDCode = "010",                //区号
 
 
 
@@ -962,14 +973,13 @@ namespace WHA_avac
 
 
 
-        public int create(int threadNo) 
+        public int getPageAndSetLocation(int threadNo) 
         {
-            string respHtml;
 
             
             setLogT(threadNo, "get first page..");
 
-            respHtml = weLoveYue(
+            string respHtml = weLoveYue(
                 threadNo,
                 "https://www.visaservices.org.in/DIAC-China-Appointment/AppScheduling/AppWelcome.aspx?p=Gta39GFZnstZVCxNVy83zTlkvzrXE95fkjmft28XjNg%3d",
                 "GET",
@@ -1022,15 +1032,19 @@ namespace WHA_avac
 
             }
 
-            return 1;
-        }
-
-
-        public int selectLocation(int threadNo)
-        {
+            
             setLogT(threadNo, "selecting Location: " + gVACity_raw);
 
-            string respHtml = weLoveYue(
+        verification:
+            ThreadStart starter = delegate { showVerificationCode(respHtml, threadNo); };
+            new Thread(starter).Start();
+
+            while (gVerificationCode[threadNo] == null || gVerificationCode[threadNo] == "")
+            {
+                Thread.Sleep(50);
+            }
+
+            respHtml = weLoveYue(
                 threadNo,
                 "https://www.visaservices.org.in/DIAC-China-Appointment/AppScheduling/AppScheduling.aspx",
                 "POST",
@@ -1042,6 +1056,7 @@ namespace WHA_avac
                 + "=%E8%AF%B7%E9%80%89%E6%8B%A9%EF%BC%9A&ctl00%24plhMain%24hdnValidation2=%E7%AD%BE%E8%AF%81%E7%94%B3%E8"
                 + "%AF%B7%E4%B8%AD%E5%BF%83&ctl00%24plhMain%24hdnValidation3=%E5%B1%85%E4%BD%8F%E5%9B%BD&____Ticket="+gTicket[threadNo].ToString()
                 + "&__EVENTVALIDATION=" + gEventvalidation[threadNo]
+                + "&ctl00%24plhMain%24mycaptchacontrol1=" + gVerificationCode[threadNo]
                 );
             gTicket[threadNo]++;
 
@@ -1059,13 +1074,18 @@ namespace WHA_avac
                 gViewstate[threadNo] = ToUrlEncode( myMatch.Groups[0].Value);
 
             }
-
+            if (respHtml.Contains("Please enter the correct verification code"))
+            {
+                setLogT(threadNo, "验证码错误！请重新输入");
+                gVerificationCode[threadNo] = "";
+                goto verification;
+            }
             return 1;
         }
 
-        public int selectVisaType(int threadNo)
+        public int selectVisaTypeAndfillInDetails(int threadNo)
         {
-            string respHtml;
+
             /*
             
             setLogT("select the visa type..");
@@ -1110,7 +1130,7 @@ namespace WHA_avac
                 setLogT(threadNo, "submitting the visa type: " + comboBox1.SelectedItem.ToString());
             });
             textBox1.Invoke(s0);
-            respHtml = weLoveYue(
+            string respHtml = weLoveYue(
                 threadNo,
                 "https://www.visaservices.org.in/DIAC-China-Appointment/AppScheduling/AppSchedulingGetInfo.aspx",
                 "POST",
@@ -1149,55 +1169,20 @@ namespace WHA_avac
                 gViewstate[threadNo] = ToUrlEncode( myMatch.Groups[0].Value);
                 
             }
+            
+        verification:
+            ThreadStart starter = delegate { showVerificationCode(respHtml, threadNo); };
+            new Thread(starter).Start();
 
-            string cCodeGuid = "";
-            reg = @"(?<=MyCaptchaImage.aspx\?guid=).*?(?="" border=)";
-            myMatch = (new Regex(reg)).Match(respHtml);
-            if (myMatch.Success)
+            while (gVerificationCode[threadNo] == null || gVerificationCode[threadNo] == "")
             {
-                cCodeGuid = myMatch.Groups[0].Value;
-            }
-            lock (pictureBox1)
-            {
-                while (gThreadNoOfVerificationCodeToBeEntered != -1)
-                {
-                    Thread.Sleep(50);
-                }
-                gThreadNoOfVerificationCodeToBeEntered = threadNo;
-                if (textBox1.InvokeRequired)
-                {
-                    delegate2 sl = new delegate2(delegate()
-                    {
-                        pictureBox1.ImageLocation = @"https://www.visaservices.org.in/DIAC-China-Appointment/AppScheduling/MyCaptchaImage.aspx?guid=" + cCodeGuid;
-                        textBox1.Text = "";
-                        textBox1.ReadOnly = false;
-                        textBox1.Focus();
-                        label6.Text = "线程" + threadNo.ToString() + ":请输入验证码";
-                        label6.Visible = true;
-                    });
-                    textBox1.Invoke(sl);
-                }
-                else
-                {
-                    pictureBox1.ImageLocation = @"https://www.visaservices.org.in/DIAC-China-Appointment/AppScheduling/MyCaptchaImage.aspx?guid=" + cCodeGuid;
-                    textBox1.Text = "";
-                    textBox1.ReadOnly = false;
-                    textBox1.Focus();
-                    label6.Text = "线程" + threadNo.ToString() + ":请输入验证码";
-                    label6.Visible = true;
-                }
+                Thread.Sleep(50);
             }
             
 
-            return 1;
-        }
-
-
-        public int fillInDetails(int threadNo)
-        {
             setLogT(threadNo, "filling in details..");
 
-            string respHtml = weLoveYue(
+            respHtml = weLoveYue(
                 threadNo,
                 "https://www.visaservices.org.in/DIAC-China-Appointment/AppScheduling/AppSchedulingVisaCategory.aspx",
                 "POST",
@@ -1258,50 +1243,15 @@ namespace WHA_avac
 
             }
 
-            if (respHtml.Contains("correct CAPTCHA alphabets"))
+            if (respHtml.Contains("Please enter the correct verification code"))
             {
                 setLogT(threadNo, "验证码错误！请重新输入");
-                string cCodeGuid = "";
-                reg = @"(?<=MyCaptchaImage.aspx\?guid=).*?(?="" border=)";
-                myMatch = (new Regex(reg)).Match(respHtml);
-                if (myMatch.Success)
-                {
-                    cCodeGuid = myMatch.Groups[0].Value;
-                }
-                lock (pictureBox1)
-                {
-                    while (gThreadNoOfVerificationCodeToBeEntered != -1)
-                    {
-                        Thread.Sleep(50);
-                    }
-                    gThreadNoOfVerificationCodeToBeEntered = threadNo;
-                    if (textBox1.InvokeRequired)
-                    {
-                        delegate2 sl = new delegate2(delegate()
-                        {
-                            pictureBox1.ImageLocation = @"https://www.visaservices.org.in/DIAC-China-Appointment/AppScheduling/MyCaptchaImage.aspx?guid=" + cCodeGuid;
-                            textBox1.Text = "";
-                            textBox1.ReadOnly = false;
-                            textBox1.Focus();
-                            label6.Text = "线程" + threadNo.ToString() + ":请输入验证码";
-                            label6.Visible = true;
-                        });
-                        textBox1.Invoke(sl);
-                    }
-                    else
-                    {
-                        pictureBox1.ImageLocation = @"https://www.visaservices.org.in/DIAC-China-Appointment/AppScheduling/MyCaptchaImage.aspx?guid=" + cCodeGuid;
-                        textBox1.Text = "";
-                        textBox1.ReadOnly = false;
-                        textBox1.Focus();
-                        label6.Text = "线程" + threadNo.ToString() + ":请输入验证码";
-                        label6.Visible = true;
-                    }
-                }
-                return -2;
+                gVerificationCode[threadNo] = "";
+                goto verification;
             }
 
-            if (respHtml.Contains("申请人已预约")||respHtml.Contains("Marked applicants already have an appointment.") )
+
+            if (respHtml.Contains("申请人已预约") || respHtml.Contains("Marked applicants already have an appointment."))
             {
                 setLogT(threadNo, "申请人已预约: " + gLastName + " " + gFirstName + ", 护照: " + gPassport);
                 return -3;
@@ -1381,7 +1331,7 @@ namespace WHA_avac
                 dateYear++;
             }
              */
- 
+
             return 1;
         }
         
@@ -1599,38 +1549,8 @@ namespace WHA_avac
         public void autoT(int threadNo)
         {
 
-            if (FastMode)
-            {
-                //create(threadNo); 
-                //not neccessary; enable ->Chinese letter; disable -> English letter; daiyyr
-
-                // we need gViewstate and gEventvalidation
-
-                if (gVACity_raw == "chengdu")
-                {
-                    create(threadNo);//do not get chengdu's chinese letter;
-                }
-
-                else
-                {
-                    gViewstate[threadNo] = "U8AJVYNixXRfz4bH8v8%2F0vyB2azTOxRhlu62TVP4Amy7PraT6FvK3uGzIJqpRnwHPLQBDjit0Tjqobj9c3TrNCXUsyOncX0WxstNd60kTj8"
-    + "%2Bd2aNdNAHhWwFQbihaPgQt5lqYnaTge7vlpLbWpGs1joqc1zDofYD9mVpEFI%2FO2z%2Bek3MI8aSix%2FDSg5erl%2B8uRJ1JwBoHBwR2so02sjNNZGjkrCqF8m6WqbVdzjMAnEEhrSuy7sSn5sx2JPCAPELzGcgvK7ymAF"
-    + "%2Fo4FpAIw21AUJdpao36ei44Jb1nWNTSJ%2BWxOVFDomPZ3QwsQGZ8V%2BNoTLnINI7n3TJBDIMEQ2yLzYp8ff%2FTZFwPwHxGkD8FQNKvvpT0tuARNasi"
-    + "%2BUtaHEQJKlxEKI7aOE6Ldav8mq7mX5%2BAjISf5kh2%2BYh%2F1stSQsvqaMa%2BbypFtiIgsf62vL4PtlFLnMFoI%3D";
-                    gEventvalidation[threadNo] = "vKas72hy5TX%2FBf2mHBuDBkov7sMsGb6ZXWrSY3QCgqt7tZc0ZpUJ50UIBDWC87xlyhZbv9pP0H8EMLWmGiAMFbVM3G%2Bx8KLMuSycqeWcdbQ44qJcqdM1qA%3D%3D";
-                }
-            }
-
-            else    //safe
-            {
-                create(threadNo); 
-            }
-            
-
-
-
-            selectLocation(threadNo);
-            if (selectVisaType(threadNo) == -9)
+            getPageAndSetLocation(threadNo);
+            if (selectVisaTypeAndfillInDetails(threadNo) == -9)
             {
                 return;
             }
@@ -1652,7 +1572,7 @@ namespace WHA_avac
         public void autoT2(int threadNo)
         {
             gThreadNoOfVerificationCodeToBeEntered = -1;
-            int fillInResult = fillInDetails(threadNo);
+            int fillInResult = selectVisaTypeAndfillInDetails(threadNo);
             if (fillInResult == -2)//incorrect vervification code
             {
                 return;
@@ -1806,6 +1726,51 @@ namespace WHA_avac
        //     Thread t = new Thread(deleteURL);
        //     t.Start();
         }
+
+        public void showVerificationCode(string respHtml, int threadNo)
+        {
+            string cCodeGuid = "";
+            reg = @"(?<=MyCaptchaImage.aspx\?guid=).*?(?="" border=)";
+            myMatch = (new Regex(reg)).Match(respHtml);
+            if (myMatch.Success)
+            {
+                cCodeGuid = myMatch.Groups[0].Value;
+            }
+            lock (pictureBox1)
+            {
+                while (gThreadNoOfVerificationCodeToBeEntered != -1)
+                {
+                    Thread.Sleep(50);
+                }
+                gThreadNoOfVerificationCodeToBeEntered = threadNo;
+                if (textBox1.InvokeRequired)
+                {
+                    delegate2 sl = new delegate2(delegate()
+                    {
+                        pictureBox1.ImageLocation = @"https://www.visaservices.org.in/DIAC-China-Appointment/AppScheduling/MyCaptchaImage.aspx?guid=" + cCodeGuid;
+                        pictureBox1.Refresh();
+                        pictureBox1.Visible = true;
+                        textBox1.Text = "";
+                        textBox1.ReadOnly = false;
+                        textBox1.Focus();
+                        label6.Text = "线程" + threadNo.ToString() + ":请输入验证码";
+                        label6.Visible = true;
+                    });
+                    textBox1.Invoke(sl);
+                }
+                else
+                {
+                    pictureBox1.ImageLocation = @"https://www.visaservices.org.in/DIAC-China-Appointment/AppScheduling/MyCaptchaImage.aspx?guid=" + cCodeGuid;
+                    pictureBox1.Refresh();
+                    pictureBox1.Visible = true;
+                    textBox1.Text = "";
+                    textBox1.ReadOnly = false;
+                    textBox1.Focus();
+                    label6.Text = "线程" + threadNo.ToString() + ":请输入验证码";
+                    label6.Visible = true;
+                }
+            }
+        }
         
         private void textBox1_TextChanged(object sender, EventArgs e)
         {
@@ -1817,18 +1782,21 @@ namespace WHA_avac
                     delegate2 sl = new delegate2(delegate()
                     {
                         textBox1.ReadOnly = true;
-                        label6.Visible = false;
+                        pictureBox1.Visible = false;
                     });
                     textBox1.Invoke(sl);
                 }
                 else
                 {
                     textBox1.ReadOnly = true;
-                    label6.Visible = false;
+                    pictureBox1.Visible = false;
                 }
+                gThreadNoOfVerificationCodeToBeEntered = -1;
 
-                ThreadStart starter = delegate { autoT2(gThreadNoOfVerificationCodeToBeEntered); };
-                new Thread(starter).Start();
+
+        //        ThreadStart starter = delegate { autoT2(gThreadNoOfVerificationCodeToBeEntered); };
+        //        new Thread(starter).Start();
+
             }
             
         }
@@ -1854,10 +1822,36 @@ namespace WHA_avac
                 label6.Visible = true;
             }
         }
-        
+
+        string testWetherThreadUseUnicValue = "CCCCCCC";
+        public void tA()
+        {
+            testWetherThreadUseUnicValue = "AAAAAAAAA";
+            for (int t = 0; t < 50; t++)
+            {
+                setLogT(-1, "tA: " + testWetherThreadUseUnicValue);
+            }
+        }
+        public void tB()
+        {
+            
+            for (int t = 0; t < 50; t++)
+            {
+                setLogT(-1, "tB: " + testWetherThreadUseUnicValue);
+            }
+            testWetherThreadUseUnicValue = "BBBBBBBBBBB";
+        }
         //for test
         private void button2_Click(object sender, EventArgs e)
         {
+
+            //testWetherThreadUseUnicValue
+            ThreadStart starter = delegate { tB(); };
+            new Thread(starter).Start();
+            starter = delegate { tA(); };
+            new Thread(starter).Start();
+            //答: 不同线程不会使用独立的类成员
+
             //test TimeSpan
             DateTime dt1 = Convert.ToDateTime("1996-01-01 00:00:00");
             DateTime dt20000101 = Convert.ToDateTime("1997-01-01 00:00:00");
