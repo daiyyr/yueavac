@@ -12,4 +12,3 @@ D:\source\yueavac\WHA_avac\sfvScout\obj\x86\Release\WHA_avac.Properties.Resource
 D:\source\yueavac\WHA_avac\sfvScout\obj\x86\Release\WHA_avac.csproj.GenerateResource.Cache
 D:\source\yueavac\WHA_avac\sfvScout\obj\x86\Release\WHA_avac.exe
 D:\source\yueavac\WHA_avac\sfvScout\obj\x86\Release\WHA_avac.pdb
-D:\source\yueavac\WHA_avac\sfvScout\obj\x86\Release\WHA_avac.csprojResolveAssemblyReference.cache

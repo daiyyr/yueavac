@@ -67,7 +67,7 @@ namespace WHA_avac
             sid = Regex.Match(html, @"(?<=\.jsp\?sid=)\w+?(?=&df=)").Value;
             // .jsp?sid=JAmlshvoaqUOwBHuygoonwWhpMKSFGmL&df=mail163_letter"
 
-            form1.setLogT(threadNo, "login " + address + " succeed.");
+            form1.setLogT(threadNo, "login " + address.Replace("%40", "@") + " succeed.");
 
 
             //to get cookie: coremail.sid
@@ -207,12 +207,12 @@ namespace WHA_avac
 
                     //(c)AKACHAN HONPO
 
-                    form1.setLogtRed(threadNo, "got the url");
+                    form1.setLogT(threadNo, "got the url");
                     return target;
                 }
                 else
                 {
-                    form1.setLogtRed(threadNo, "do not find the notification mail, retry in 100ms");
+                    form1.setLogT(threadNo, "do not find the notification mail, retry in 100ms");
                     Thread.Sleep(100);
                 }
             }
@@ -310,12 +310,12 @@ namespace WHA_avac
 
                     //(c)AKACHAN HONPO
 
-                    form1.setLogtRed(threadNo, "got the url");
+                    form1.setLogT(threadNo, "got the url");
                     return target;
                 }
                 else
                 {
-                    form1.setLogtRed(threadNo, "do not find the notification mail");
+                    form1.setLogT(threadNo, "do not find the notification mail");
                 }
             }
 

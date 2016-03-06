@@ -17,7 +17,7 @@ namespace WHA_avac
     public partial class Form1 : Form
     {
 
-        bool debug = true;
+        bool debug = false;
         public const int retry = 5;
 
         bool FastMode = true;
@@ -35,7 +35,6 @@ namespace WHA_avac
         List<string> gHtml = new List<string>();
 
         string gPassword = "mushroom123";
-        string emailPassword = "dyyr7921129";
 
         /*
 
@@ -367,25 +366,112 @@ namespace WHA_avac
                 gMobile = "13826093210",           //手机
                 gPassport = "G43554059",          //护照号
                 gSTDCode = "020",                //区号
-        */
+        
 
 
-        //淘寶訂單號：1117344195511596
-        //qq號 1435995917
+        //咖啡客户 500元
         string gVACity_raw = "shanghai",         // 递签地点  beijing  shanghai  guangzhou  chengdu
                 gTitle = "MS.",                  //  称呼  MR.  或   MS.
-                gContactNumber = "64313881",      // 固定电话
-                gEmail = "15985830370@163.com",   //邮箱
-                gFirstName = "sddfasdf",          //护照上的名
-                gLastName = "aefda",                //护照上的姓
-                gMobile = "18513603543",           //手机
-                gPassport = "E432543539",          //护照号
-                gSTDCode = "010",                //区号
-
+                gContactNumber = "28888888",      // 固定电话
+                gEmail = "auwhver01@163.com",   //邮箱
+                gFirstName = "YUN",          //护照上的名
+                gLastName = "HUANG",                //护照上的姓
+                gMobile = "13585768157",           //手机
+                gPassport = "E13230312",          //护照号
+                gSTDCode = "021",                //区号
+                emailPassword = "123qwe",       //登录邮箱的密码
 
 
                gVACity = "",
                gCategory = "from combobox";          //13 for general, 17 for work and holiday;
+
+        
+
+
+        //咖啡客户 刘真真
+        string gVACity_raw = "shanghai",         // 递签地点  beijing  shanghai  guangzhou  chengdu
+                gTitle = "MS.",                  //  称呼  MR.  或   MS.
+                gContactNumber = "54893255",      // 固定电话
+                gEmail = "auwhv01@163.com",   //邮箱
+                gFirstName = "ZHENZHEN",          //护照上的名
+                gLastName = "LIU",                //护照上的姓
+                gMobile = "15821775081",           //手机
+                gPassport = "E69265532",          //护照号
+                gSTDCode = "021",                //区号
+                emailPassword = "123qwe",       //登录邮箱的密码
+
+               gVACity = "",
+               gCategory = "from combobox";          //13 for general, 17 for work and holiday;
+        
+
+        //咖啡客户 晏阳
+        string gVACity_raw = "shanghai",         // 递签地点  beijing  shanghai  guangzhou  chengdu
+                gTitle = "MR.",                  //  称呼  MR.  或   MS.
+                gContactNumber = "87692008",      // 固定电话
+                gEmail = "auwhv02@163.com",   //邮箱
+                gFirstName = "YANG",          //护照上的名
+                gLastName = "YAN",                //护照上的姓
+                gMobile = "13419666648",           //手机
+                gPassport = "E18480170",          //护照号
+                gSTDCode = "027",                //区号
+                emailPassword = "123qwe",       //登录邮箱的密码
+
+               gVACity = "",
+               gCategory = "from combobox";          //13 for general, 17 for work and holiday;
+        
+
+
+
+        //咖啡客户 李昕妍
+        string gVACity_raw = "shanghai",         // 递签地点  beijing  shanghai  guangzhou  chengdu
+                gTitle = "MS.",                  //  称呼  MR.  或   MS.
+                gContactNumber = "87692008",      // 固定电话
+                gEmail = "auwhv03@163.com",   //邮箱
+                gFirstName = "XINYAN",          //护照上的名
+                gLastName = "LI",                //护照上的姓
+                gMobile = "13502170793",           //手机
+                gPassport = "E21369194",          //护照号
+                gSTDCode = "022",                //区号
+                emailPassword = "123qwe",       //登录邮箱的密码
+
+               gVACity = "",
+               gCategory = "from combobox";          //13 for general, 17 for work and holiday;
+        
+
+        //咖啡客户 李文昭
+        string gVACity_raw = "shanghai",         // 递签地点  beijing  shanghai  guangzhou  chengdu
+                gTitle = "MR.",                  //  称呼  MR.  或   MS.
+                gContactNumber = "87692008",      // 固定电话
+                gEmail = "auwhv04@163.com",   //邮箱
+                gFirstName = "WENZHAO",          //护照上的名
+                gLastName = "LI",                //护照上的姓
+                gMobile = "18502604017",           //手机
+                gPassport = "E22812514",          //护照号
+                gSTDCode = "022",                //区号
+                emailPassword = "123qwe",       //登录邮箱的密码
+
+               gVACity = "",
+               gCategory = "from combobox";          //13 for general, 17 for work and holiday;
+        */
+
+        //咖啡客户 罗琼
+        string gVACity_raw = "shanghai",         // 递签地点  beijing  shanghai  guangzhou  chengdu
+                gTitle = "MS.",                  //  称呼  MR.  或   MS.
+                gContactNumber = "87692008",      // 固定电话
+                gEmail = "auwhv05@163.com",   //邮箱
+                gFirstName = "QIONG",          //护照上的名
+                gLastName = "LUO",                //护照上的姓
+                gMobile = "15926221656",           //手机
+                gPassport = "E49743841",          //护照号
+                gSTDCode = "027",                //区号
+                emailPassword = "123qwe",       //登录邮箱的密码
+
+               gVACity = "",
+               gCategory = "from combobox";          //13 for general, 17 for work and holiday;
+
+
+
+
 
 
 
@@ -467,6 +553,8 @@ namespace WHA_avac
                 gVACity = "31";
             }
             gEmail = gEmail.Replace("@", "%40");
+            gFirstName = gFirstName.ToUpper();
+            gLastName = gLastName.ToUpper();
             if (File.Exists(System.Environment.CurrentDirectory + "\\" + "urlList"))
             {
                 string[] lines = File.ReadAllLines(System.Environment.CurrentDirectory + "\\" + "urlList");
@@ -1420,6 +1508,15 @@ namespace WHA_avac
             setLogT(threadNo, "step2");
             gTicket[threadNo] = 1;
 
+            string p = "";
+            reg = @"(?<=aspx\?P=)(\s|\S)+?(?=$)";
+            myMatch = (new Regex(reg)).Match(urlForStep2[threadNo]);
+            if (myMatch.Success)
+            {
+                p = ToUrlEncode(myMatch.Groups[0].Value);
+            }
+            
+
             string respHtml = weLoveYue(
                 threadNo,
                 urlForStep2[threadNo],
@@ -1455,9 +1552,9 @@ namespace WHA_avac
             }
             respHtml = weLoveYue(
                 threadNo,
-                "https://www.visaservices.org.in/DIAC-China-Appointment/AppScheduling/AppSchedulingVisaCategory.aspx",
+                "https://www.visaservices.org.in/DIAC-China-Appointment/AppScheduling/AppSchedulingVisaCategory.aspx?p="+p,
                 "POST",
-                "https://www.visaservices.org.in/DIAC-China-Appointment/AppScheduling/AppSchedulingGetInfo.aspx",
+                urlForStep2[threadNo],
                 false,
                 "__VIEWSTATE=" + gViewstate[threadNo]
                 + "&ctl00%24plhMain%24repAppVisaDetails%24ctl01%24tbxPassportNo="
@@ -1476,8 +1573,8 @@ namespace WHA_avac
                 + "&ctl00%24plhMain%24repAppVisaDetails"
                 + "%24ctl01%24tbxMobileNumber="
                 + gMobile
-                + "&ctl00%24plhMain%24btnSubmit=Submit&ctl00%24plhMain%24mycaptchacontrol1"
-                + "=p4rg2&ctl00%24plhMain%24hdnValidation1=Please+enter+Passport+No.+of+Applicant+no.&ctl00%24plhMain%24hdnValidation2"
+                + "&ctl00%24plhMain%24btnSubmit=Submit"
+                + "&ctl00%24plhMain%24hdnValidation1=Please+enter+Passport+No.+of+Applicant+no.&ctl00%24plhMain%24hdnValidation2"
                 + "=Please+select+title+for+applicant+no.&ctl00%24plhMain%24hdnValidation3=Please+enter+given+name%28s%29"
                 + "+of+Applicant+no.&ctl00%24plhMain%24hdnValidation4=Please+enter+surname+of+Applicant+no.&ctl00%24plhMain"
                 + "%24hdnValidation5=Please+enter+mobile+no.+for+applicant+no.&ctl00%24plhMain%24hdnValidation6=Please+enter"
@@ -1490,6 +1587,7 @@ namespace WHA_avac
                 );
             gTicket[threadNo]++;
             gVerificationCode[threadNo] = "";//不论输入得正确与否, 都需要清空
+            gHtml[threadNo] = respHtml;
 
             reg = @"(?<=name=""__EVENTVALIDATION"" id=""__EVENTVALIDATION"" value="").*?(?="" />)";
             myMatch = (new Regex(reg)).Match(respHtml);
@@ -1509,14 +1607,13 @@ namespace WHA_avac
             if (respHtml.Contains("Please enter the correct verification code") || respHtml.Contains("Please enter the correct CAPTCHA alphabets"))
             {
                 setLogT(threadNo, "验证码错误！请重新输入");
-                gVerificationCode[threadNo] = "";
                 goto verification1;
             }
 
 
             if (respHtml.Contains("申请人已预约") || respHtml.Contains("Marked applicants already have an appointment."))
             {
-                setLogT(threadNo, "申请人已预约: " + gLastName + " " + gFirstName + ", 护照: " + gPassport);
+                setLogtRed(threadNo, "申请人已预约: " + gLastName + " " + gFirstName + ", 护照: " + gPassport);
                 return -3;
             }
 
@@ -1542,7 +1639,7 @@ namespace WHA_avac
                 return -1;
             }
 
-            gHtml[threadNo] = respHtml;
+            
 
 
 
@@ -1639,6 +1736,7 @@ namespace WHA_avac
                         );
                     gTicket[threadNo]++;
                     gVerificationCode[threadNo] = "";//不论输入得正确与否, 都需要清空
+                    gHtml[threadNo] = respHtml;
                 }
 
                 reg = @"(?<=name=""__EVENTVALIDATION"" id=""__EVENTVALIDATION"" value="").*?(?="" />)";
@@ -1660,7 +1758,6 @@ namespace WHA_avac
                 if (respHtml.Contains("Please enter the correct verification code"))
                 {
                     setLogT(threadNo, "验证码错误！请重新输入");
-                    gVerificationCode[threadNo] = "";
                     goto verification1;
                 }
                 
@@ -1684,7 +1781,6 @@ namespace WHA_avac
                         
                     }
                 }
-
                 return 1;
             }
         }
@@ -1693,6 +1789,15 @@ namespace WHA_avac
         {
             setLogT(threadNo, "pickTime..");
 
+        verification1:
+            ThreadStart starter = delegate { showVerificationCode(gHtml[threadNo], threadNo); };
+            new Thread(starter).Start();
+
+            while (gVerificationCode[threadNo] == null || gVerificationCode[threadNo] == "")
+            {
+                Thread.Sleep(50);
+            }
+
             string respHtml = weLoveYue(
                 threadNo,
                 "https://www.visaservices.org.in/DIAC-China-Appointment/AppScheduling/AppSchedulingInterviewDate.aspx",
@@ -1700,13 +1805,25 @@ namespace WHA_avac
                 "https://www.visaservices.org.in/DIAC-China-Appointment/AppScheduling/AppSchedulingInterviewDate.aspx",
                 false,
                 "__EVENTTARGET=ctl00%24plhMain%24gvSlot%24ctl" + gTime
-                +"%24lnkTimeSlot&__EVENTARGUMENT=&__VIEWSTATE=" + gViewstate[threadNo]
-            +"&____Ticket="+gTicket[threadNo].ToString()
-            +"&__EVENTVALIDATION="+ gEventvalidation[threadNo]
+                + "%24lnkTimeSlot&__EVENTARGUMENT="
+                + "&__VIEWSTATE=" + gViewstate[threadNo]
+                + "&ctl00%24plhMain%24mycaptchacontrol1=" + gVerificationCode[threadNo]
+                + "&____Ticket="+gTicket[threadNo].ToString()
+                + "&__EVENTVALIDATION="+ gEventvalidation[threadNo]
             );
             gTicket[threadNo]++;
             gVerificationCode[threadNo] = "";//不论输入得正确与否, 都需要清空
+            gHtml[threadNo] = respHtml;
 
+            if (respHtml.Contains("Your appointment is Rescheduled"))
+            {
+                setLogtRed(threadNo, "预约成功！请自行登录AVAC官网打印预约信");
+                setLogtRed(threadNo, "打印方式:");
+                setLogtRed(threadNo, "1. 访问这个地址 https://www.visaservices.org.in/DIAC-China-Appointment/AppScheduling/PrintAppLetter.aspx, 点击\"打印预约信\" ");
+                setLogtRed(threadNo, "2. 在电子邮件处输入" + gEmail.Replace("%40", "@") + ", 在密码处输入" + gPassword);
+                setLogtRed(threadNo, "3. 输入您的护照号码和姓氏拼音, 确认号码不需要填写");
+                return 1;
+            }
             string lblReference = "";
             reg = @"(?<=<span id=""lblReference"">).*?(?=</span>)";
             myMatch = (new Regex(reg)).Match(respHtml);
@@ -1717,6 +1834,28 @@ namespace WHA_avac
             }
             else
             {
+                reg = @"(?<=name=""__EVENTVALIDATION"" id=""__EVENTVALIDATION"" value="").*?(?="" />)";
+                myMatch = (new Regex(reg)).Match(respHtml);
+                if (myMatch.Success)
+                {
+                    gEventvalidation[threadNo] = ToUrlEncode(myMatch.Groups[0].Value);
+                }
+
+                reg = @"(?<=id=""__VIEWSTATE"" value="").*?(?="" />)";
+                myMatch = (new Regex(reg)).Match(respHtml);
+                if (myMatch.Success)
+                {
+                    gViewstate[threadNo] = ToUrlEncode(myMatch.Groups[0].Value);
+
+                }
+
+
+                if (respHtml.Contains("Please enter the correct verification code"))
+                {
+                    setLogT(threadNo, "验证码错误！请重新输入");
+                    goto verification1;
+                }
+
                 lock (gDays)
                 {
                     if (gDays.Count > 0)
