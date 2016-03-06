@@ -420,42 +420,25 @@ namespace WHA_avac
                gCategory = "from combobox";          //13 for general, 17 for work and holiday;
         
 
-
-
-        //咖啡客户 李昕妍
-        string gVACity_raw = "shanghai",         // 递签地点  beijing  shanghai  guangzhou  chengdu
-                gTitle = "MS.",                  //  称呼  MR.  或   MS.
+        
+        //咖啡客户 刘灿
+        string gVACity_raw = "guangzhou",         // 递签地点  beijing  shanghai  guangzhou  chengdu
+                gTitle = "MR.",                  //  称呼  MR.  或   MS.
                 gContactNumber = "87692008",      // 固定电话
-                gEmail = "auwhv03@163.com",   //邮箱
-                gFirstName = "XINYAN",          //护照上的名
-                gLastName = "LI",                //护照上的姓
-                gMobile = "13502170793",           //手机
-                gPassport = "E21369194",          //护照号
-                gSTDCode = "022",                //区号
+                gEmail = "auwhv06@163.com",   //邮箱
+                gFirstName = "CAN",          //护照上的名
+                gLastName = "LIU",                //护照上的姓
+                gMobile = "14715016525",           //手机
+                gPassport = "E12711792",          //护照号
+                gSTDCode = "0451",                //区号
                 emailPassword = "123qwe",       //登录邮箱的密码
 
                gVACity = "",
                gCategory = "from combobox";          //13 for general, 17 for work and holiday;
         
 
-        //咖啡客户 李文昭
-        string gVACity_raw = "shanghai",         // 递签地点  beijing  shanghai  guangzhou  chengdu
-                gTitle = "MR.",                  //  称呼  MR.  或   MS.
-                gContactNumber = "87692008",      // 固定电话
-                gEmail = "auwhv04@163.com",   //邮箱
-                gFirstName = "WENZHAO",          //护照上的名
-                gLastName = "LI",                //护照上的姓
-                gMobile = "18502604017",           //手机
-                gPassport = "E22812514",          //护照号
-                gSTDCode = "022",                //区号
-                emailPassword = "123qwe",       //登录邮箱的密码
-
-               gVACity = "",
-               gCategory = "from combobox";          //13 for general, 17 for work and holiday;
-        */
-
         //咖啡客户 罗琼
-        string gVACity_raw = "shanghai",         // 递签地点  beijing  shanghai  guangzhou  chengdu
+        string gVACity_raw = "beijing",         // 递签地点  beijing  shanghai  guangzhou  chengdu
                 gTitle = "MS.",                  //  称呼  MR.  或   MS.
                 gContactNumber = "87692008",      // 固定电话
                 gEmail = "auwhv05@163.com",   //邮箱
@@ -468,12 +451,54 @@ namespace WHA_avac
 
                gVACity = "",
                gCategory = "from combobox";          //13 for general, 17 for work and holiday;
+        
+        //咖啡客户 李文昭
+        string gVACity_raw = "beijing",         // 递签地点  beijing  shanghai  guangzhou  chengdu
+                gTitle = "MR.",                  //  称呼  MR.  或   MS.
+                gContactNumber = "87692008",      // 固定电话
+                gEmail = "auwhv04@163.com",   //邮箱
+                gFirstName = "WENZHAO",          //护照上的名
+                gLastName = "LI",                //护照上的姓
+                gMobile = "18502604017",           //手机
+                gPassport = "E22812514",          //护照号
+                gSTDCode = "022",                //区号
+                emailPassword = "123qwe",       //登录邮箱的密码
+
+               gVACity = "",
+               gCategory = "from combobox";          //13 for general, 17 for work and holiday;
+
+       
+        //咖啡客户 李昕妍
+        string gVACity_raw = "beijing",         // 递签地点  beijing  shanghai  guangzhou  chengdu
+                gTitle = "MS.",                  //  称呼  MR.  或   MS.
+                gContactNumber = "87692008",      // 固定电话
+                gEmail = "auwhv03@163.com",   //邮箱
+                gFirstName = "XINYAN",          //护照上的名
+                gLastName = "LI",                //护照上的姓
+                gMobile = "13502170793",           //手机
+                gPassport = "E21369194",          //护照号
+                gSTDCode = "022",                //区号
+                emailPassword = "123qwe",       //登录邮箱的密码
+
+               gVACity = "",
+               gCategory = "from combobox";          //13 for general, 17 for work and holiday;
+         */
 
 
+        //咖啡客户 江笑
+        string gVACity_raw = "beijing",         // 递签地点  beijing  shanghai  guangzhou  chengdu
+                gTitle = "MS.",                  //  称呼  MR.  或   MS.
+                gContactNumber = "87692008",      // 固定电话
+                gEmail = "auwhv07@163.com",   //邮箱
+                gFirstName = "XIAO",          //护照上的名
+                gLastName = "JIANG",                //护照上的姓
+                gMobile = "13466545457",           //手机
+                gPassport = "E03436873",          //护照号
+                gSTDCode = "027",                //区号
+                emailPassword = "123qwe",       //登录邮箱的密码
 
-
-
-
+               gVACity = "",
+               gCategory = "from combobox";          //13 for general, 17 for work and holiday;
 
 
 
