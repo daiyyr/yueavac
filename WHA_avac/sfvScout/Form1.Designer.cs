@@ -52,6 +52,7 @@
             this.label8 = new System.Windows.Forms.Label();
             this.label9 = new System.Windows.Forms.Label();
             this.comboBox2 = new System.Windows.Forms.ComboBox();
+            this.button3 = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
             // 
@@ -262,10 +263,10 @@
             // 
             // button2
             // 
-            this.button2.Location = new System.Drawing.Point(755, 94);
+            this.button2.Location = new System.Drawing.Point(455, 435);
             this.button2.Margin = new System.Windows.Forms.Padding(4);
             this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(187, 69);
+            this.button2.Size = new System.Drawing.Size(91, 36);
             this.button2.TabIndex = 23;
             this.button2.Text = "test";
             this.button2.UseVisualStyleBackColor = true;
@@ -317,11 +318,22 @@
             this.comboBox2.TabIndex = 24;
             this.comboBox2.SelectedIndexChanged += new System.EventHandler(this.comboBox2_SelectedIndexChanged);
             // 
+            // button3
+            // 
+            this.button3.Location = new System.Drawing.Point(455, 478);
+            this.button3.Name = "button3";
+            this.button3.Size = new System.Drawing.Size(136, 40);
+            this.button3.TabIndex = 27;
+            this.button3.Text = "尝试打印预约信";
+            this.button3.UseVisualStyleBackColor = true;
+            this.button3.Click += new System.EventHandler(this.button3_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(651, 589);
+            this.ClientSize = new System.Drawing.Size(650, 589);
+            this.Controls.Add(this.button3);
             this.Controls.Add(this.label9);
             this.Controls.Add(this.label8);
             this.Controls.Add(this.comboBox2);
@@ -381,6 +393,7 @@
         private System.Windows.Forms.Label label8;
         private System.Windows.Forms.Label label9;
         private System.Windows.Forms.ComboBox comboBox2;
+        private System.Windows.Forms.Button button3;
     }
 }
 
