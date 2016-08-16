@@ -30,7 +30,7 @@ namespace WHA_avac
         bool FastMode = true;
 
 
-
+        public static int timeoutTime = 60000;
         public const int retry = 5;
 
         
@@ -57,10 +57,10 @@ namespace WHA_avac
                gTitle = "MR.",                  //  称呼  MR.  或   MS.
                gContactNumber = "1234567",      // 固定电话
                gEmail = "15985830370@163.com",   //邮箱
-               gFirstName = "jinping",          //护照上的名
-               gLastName = "xi",                //护照上的姓
+               gFirstName = "ffff",          //护照上的名
+               gLastName = "ww",                //护照上的姓
                gMobile = "139034000",           //手机
-               gPassport = "E722330033",          //护照号
+               gPassport = "TE332af3",          //护照号
                gSTDCode = "0533",                //区号
                emailPassword = "dyyr7921129",
 
@@ -625,6 +625,7 @@ namespace WHA_avac
         {
             InitializeComponent();
 
+            rate.Text = timeoutTime.ToString();
             comboBox2.SelectedIndex = 0; //fast
             FastMode = true;
 
@@ -812,6 +813,7 @@ namespace WHA_avac
             //req.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
 
             req.Host = "www.visaservices.in";
+            req.Timeout = timeoutTime;
 
             req.AllowAutoRedirect = false;
             req.ContentType = "application/x-www-form-urlencoded";
@@ -1177,6 +1179,8 @@ namespace WHA_avac
 
             
             setLogT(threadNo, "step1");
+
+            firstpage:
             setLogT(threadNo, "get first page..");
 
             string respHtml = weLoveYue(
@@ -1193,17 +1197,25 @@ namespace WHA_avac
             {
                 gEventvalidation[threadNo] = ToUrlEncode(myMatch.Groups[0].Value);
             }
+            else
+            {
+                setLogtRed(threadNo, "getting page failed, retry..");
+                goto firstpage;
+            }
 
             reg = @"(?<=id=""__VIEWSTATE"" value="").*?(?="" />)";
             myMatch = (new Regex(reg)).Match(respHtml);
             if (myMatch.Success)
             {
                 gViewstate[threadNo] = ToUrlEncode(myMatch.Groups[0].Value);
-
             }
-
+            else
+            {
+                setLogtRed(threadNo, "getting page failed, retry..");
+                goto firstpage;
+            }
             
-
+            makeapointment:
             setLogT(threadNo, "make a pointment..");
             respHtml = weLoveYue(
                 threadNo,
@@ -1223,15 +1235,22 @@ namespace WHA_avac
             {
                 gEventvalidation[threadNo] = ToUrlEncode( myMatch.Groups[0].Value);
             }
-
+            else
+            {
+                setLogtRed(threadNo, "getting page failed, retry..");
+                goto makeapointment;
+            }
             reg = @"(?<=id=""__VIEWSTATE"" value="").*?(?="" />)";
             myMatch = (new Regex(reg)).Match(respHtml);
             if (myMatch.Success)
             {
                 gViewstate[threadNo] = ToUrlEncode( myMatch.Groups[0].Value);
-
             }
-
+            else
+            {
+                setLogtRed(threadNo, "getting page failed, retry..");
+                goto makeapointment;
+            }
             
             setLogT(threadNo, "selecting Location: " + gVACity_raw);
 
@@ -1244,6 +1263,7 @@ namespace WHA_avac
                 Thread.Sleep(50);
             }
 
+            selectingLocation:
             respHtml = weLoveYue(
                 threadNo,
                 "https://www.visaservices.in/DIAC-China-Appointment_new/AppScheduling/AppScheduling.aspx",
@@ -1267,6 +1287,11 @@ namespace WHA_avac
             {
                 gEventvalidation[threadNo] = ToUrlEncode( myMatch.Groups[0].Value);
             }
+            else
+            {
+                setLogtRed(threadNo, "getting page failed, retry..");
+                goto selectingLocation;
+            }
 
             reg = @"(?<=id=""__VIEWSTATE"" value="").*?(?="" />)";
             myMatch = (new Regex(reg)).Match(respHtml);
@@ -1274,51 +1299,16 @@ namespace WHA_avac
             {
                 gViewstate[threadNo] = ToUrlEncode( myMatch.Groups[0].Value);
             }
+            else
+            {
+                setLogtRed(threadNo, "getting page failed, retry..");
+                goto selectingLocation;
+            }
             if (respHtml.Contains("Please enter the correct verification code"))
             {
                 setLogT(threadNo, "验证码错误！请重新输入");
                 goto verification1;
             }
-            
-
-            /*
-            
-            setLogT("select the visa type..");
-            //neccessary?
-            respHtml = weLoveYue(
-                "https://www.visaservices.in/DIAC-China-Appointment_new/AppScheduling/AppSchedulingGetInfo.aspx",
-                "POST",
-                "https://www.visaservices.in/DIAC-China-Appointment_new/AppScheduling/AppSchedulingGetInfo.aspx",
-                false,
-                "__EVENTTARGET=ctl00%24plhMain%24cboVisaCategory&__EVENTARGUMENT=&__LASTFOCUS=&__VIEWSTATE=" + gViewstate
-                + "&ctl00%24plhMain%24tbxNumOfApplicants=1&ctl00%24plhMain%24cboVisaCategory=" + gCategory //13 for general, 17 for working and holiday
-                + "&ctl00%24plhMain%24hdnValidation1=%E8%AF%B7%E8%BE%93%E5%85%A5%EF%BC%9A&ctl00%24plhMain%24hdnValidation2=%E6%9C%89%E6%95%88%E4%BA%BA%E6"
-                +"%95%B0%E3%80%82&ctl00%24plhMain%24hdnValidation3=%E6%8A%A5%E5%90%8D%E4%BA%BA%E6%95%B0%E5%BF%85%E9%A1"
-                +"%BB%E4%BB%8B%E4%BA%8E1%E5%92%8C++&ctl00%24plhMain%24hdnValidation4=%E7%AD%BE%E8%AF%81%E7%B1%BB%E5%88%AB"
-                + "&____Ticket="+gTicket.ToString()
-                + "&__EVENTVALIDATION=" + gEventvalidation
-                );
-            gTicket++;
-
-            reg = @"(?<=name=""__EVENTVALIDATION"" id=""__EVENTVALIDATION"" value="").*?(?="" />)";
-            myMatch = (new Regex(reg)).Match(respHtml);
-            if (myMatch.Success)
-            {
-                gEventvalidation = myMatch.Groups[0].Value;
-
-            }
-            gEventvalidation = ToUrlEncode(gEventvalidation);
-
-            reg = @"(?<=id=""__VIEWSTATE"" value="").*?(?="" />)";
-            myMatch = (new Regex(reg)).Match(respHtml);
-            if (myMatch.Success)
-            {
-                gViewstate = myMatch.Groups[0].Value;
-
-            }
-            gViewstate = ToUrlEncode(gViewstate);
-
-            */
 
             delegate2 s0 = new delegate2(delegate()
             {
@@ -1326,19 +1316,7 @@ namespace WHA_avac
             });
             textBox1.Invoke(s0);
 
-            /**** 选择签证类别步骤不需要验证码
-             * 
-             * 
-        verification2:
-            starter = delegate { showVerificationCode(respHtml, threadNo); };
-            new Thread(starter).Start();
-
-            while (gVerificationCode[threadNo] == null || gVerificationCode[threadNo] == "")
-            {
-                Thread.Sleep(50);
-            }
-            */
-
+            visatype:
             respHtml = weLoveYue(
                 threadNo,
                 "https://www.visaservices.in/DIAC-China-Appointment_new/AppScheduling/AppSchedulingGetInfo.aspx",
@@ -1369,7 +1347,11 @@ namespace WHA_avac
             if (myMatch.Success)
             {
                 gEventvalidation[threadNo] = ToUrlEncode( myMatch.Groups[0].Value);
-                
+            }
+            else
+            {
+                setLogtRed(threadNo, "getting page failed, retry..");
+                goto visatype;
             }
 
             reg = @"(?<=id=""__VIEWSTATE"" value="").*?(?="" />)";
@@ -1377,15 +1359,15 @@ namespace WHA_avac
             if (myMatch.Success)
             {
                 gViewstate[threadNo] = ToUrlEncode( myMatch.Groups[0].Value);
-                
             }
-            /*
-            if (respHtml.Contains("Please enter the correct verification code"))
+            else
             {
-                setLogT(threadNo, "验证码错误！请重新输入");
-                goto verification2;
+                setLogtRed(threadNo, "getting page failed, retry..");
+                goto visatype;
             }
-            */
+
+            setLogT(threadNo, "filling in email address..");
+
         verification3:
             starter = delegate { showVerificationCode(respHtml, threadNo); };
             new Thread(starter).Start();
@@ -1394,15 +1376,13 @@ namespace WHA_avac
             {
                 Thread.Sleep(50);
             }
-
-            setLogT(threadNo, "filling in email address..");
-
+            
             respHtml = weLoveYue(
                 threadNo,
                 "https://www.visaservices.in/DIAC-China-Appointment_new/AppScheduling/EmailRegistration.aspx",
                 "POST",
                 "https://www.visaservices.in/DIAC-China-Appointment_new/AppScheduling/AppSchedulingGetInfo.aspx",
-                false,
+                true,
                 "__VIEWSTATE=" + gViewstate[threadNo]
                 + "&__EVENTVALIDATION=" + gEventvalidation[threadNo]
                 + "&ctl00%24plhMain%24txtCnfPassword="
@@ -1435,26 +1415,37 @@ namespace WHA_avac
                 if (myMatch.Success)
                 {
                     gViewstate[threadNo] = ToUrlEncode(myMatch.Groups[0].Value);
-
                 }
-
                 goto verification3;
+            }
+            else if (respHtml.Contains("请登录您的注册邮箱打开该网址"))
+            {
+                setLogT(threadNo, "邮件已送出, step1 finish");
+                Mail163 myMail = new Mail163(threadNo, gEmail, emailPassword, this);
+                urlForStep2[threadNo] = myMail.queery("Appointment Registration URL", @"https://www\.visaservices(\s|\S)+?(?=</a>)");
+                return 1;
             }
             else
             {
-                setLogT(threadNo, "邮件已送出, step1 finish");
+                setLogT(threadNo, "未收到邮件送出回执, 仍然尝试接收邮件, 同时请再开软件继续申请");
+                Thread.Sleep(3000);
+                Mail163 myMail = new Mail163(threadNo, gEmail, emailPassword, this);
+                urlForStep2[threadNo] = myMail.queery("Appointment Registration URL", @"https://www\.visaservices(\s|\S)+?(?=</a>)");
+                return 1;
             }
 
-            Mail163 myMail = new Mail163(threadNo, gEmail, emailPassword, this);
-            
-            //urlForStep2[threadNo] = myMail.queery("预约注册网址", @"https://www\.visaservices(\s|\S)+?(?=</a>)");
-            urlForStep2[threadNo] = myMail.queery("Appointment Registration URL", @"https://www\.visaservices(\s|\S)+?(?=</a>)");
-            return 1;
+            return -1;
         }
 
 
 
         public int apply2(int threadNo) {
+            if (urlForStep2[threadNo] == "Appointment Letter")
+            {
+                return -12;
+            }
+
+
             setLogT(threadNo, "step2");
             gTicket[threadNo] = 1;
 
@@ -1465,8 +1456,14 @@ namespace WHA_avac
             {
                 p = ToUrlEncode(myMatch.Groups[0].Value);
             }
-            
+            else
+            {
+                setLogtRed(threadNo, "invalid URL for step2, 申请异常终止！");
+                return -2;
+            }
 
+            setLogT(threadNo, "getting step2 page..");
+            gettingstep2page:
             string respHtml = weLoveYue(
                 threadNo,
                 urlForStep2[threadNo],
@@ -1481,13 +1478,22 @@ namespace WHA_avac
             {
                 gEventvalidation[threadNo] = ToUrlEncode(myMatch.Groups[0].Value);
             }
+            else
+            {
+                setLogtRed(threadNo, "getting page failed, retry..");
+                goto gettingstep2page;
+            }
 
             reg = @"(?<=id=""__VIEWSTATE"" value="").*?(?="" />)";
             myMatch = (new Regex(reg)).Match(respHtml);
             if (myMatch.Success)
             {
                 gViewstate[threadNo] = ToUrlEncode(myMatch.Groups[0].Value);
-
+            }
+            else
+            {
+                setLogtRed(threadNo, "getting page failed, retry..");
+                goto gettingstep2page;
             }
 
             setLogT(threadNo, "filling in details..");
@@ -1500,6 +1506,7 @@ namespace WHA_avac
             {
                 Thread.Sleep(50);
             }
+            details:
             respHtml = weLoveYue(
                 threadNo,
                 "https://www.visaservices.in/DIAC-China-Appointment_new/AppScheduling/AppSchedulingVisaCategory.aspx?p="+p,
@@ -1545,13 +1552,22 @@ namespace WHA_avac
             {
                 gEventvalidation[threadNo] = ToUrlEncode(myMatch.Groups[0].Value);
             }
+            else
+            {
+                setLogtRed(threadNo, "getting page failed, retry..");
+                goto details;
+            }
 
             reg = @"(?<=id=""__VIEWSTATE"" value="").*?(?="" />)";
             myMatch = (new Regex(reg)).Match(respHtml);
             if (myMatch.Success)
             {
                 gViewstate[threadNo] = ToUrlEncode(myMatch.Groups[0].Value);
-
+            }
+            else
+            {
+                setLogtRed(threadNo, "getting page failed, retry..");
+                goto details;
             }
 
             if (respHtml.Contains("Please enter the correct verification code") || respHtml.Contains("Please enter the correct CAPTCHA alphabets"))
@@ -1586,63 +1602,8 @@ namespace WHA_avac
             if (gDays.Count == 0)
             {
                 setLogT(threadNo, gVACity_raw + ", " + (gCategory.Equals("17") ? "working and holiday, " : "general") + ", 名额已满, 请尝试其它预约地点");
-                return -1;
+                return -5;
             }
-
-            
-
-
-
-            //we do not need to calculate the TimeSpan, it's on the page
-            /*
-            string dateDay="";
-            string dateMonth="";
-            int dateYear = 2015;
-            
-            //find the month
-            reg = @"(?<=style=""color:Black"" title="").*?(?= \d+"")";
-            myMatch = (new Regex(reg)).Match(respHtml);
-            if (myMatch.Success)
-            {
-                dateMonth = myMatch.Groups[0].Value;
-            }
-            else
-            {
-                setLogT("Error.. there is no available month");
-                return -1;
-            }
-
-            //find a latest day
-            for (int i = 31; i > 0; i--)
-            {
-                reg = i.ToString()+@""">"+i.ToString()+@"</a></td><td align";
-                myMatch = (new Regex(reg)).Match(respHtml);
-                if (myMatch.Success)
-                {
-                    dateDay = i.ToString();
-                    break;
-                }
-            }
-            if (dateDay.Equals(""))
-            {
-                setLogT(gVACity_raw + ", " + (gCategory.Equals("17")?"working and holiday, ":"general") + ", 名额已满!");
-                return -1;
-            }
-
-            //find the year
-            DateTimeFormatInfo dtFormat = new DateTimeFormatInfo();
-            dtFormat.ShortDatePattern = "yyyyMMMMd";
-            while (true)
-            {
-                DateTime dt = Convert.ToDateTime(dateYear.ToString() + dateMonth + dateDay, dtFormat);
-                if ((dt - DateTime.Now).Days > 0)
-                {
-                    gDays[1] = (dt - Convert.ToDateTime("2000-01-01 00:00:00")).Days.ToString();
-                    break;
-                }
-                dateYear++;
-            }
-             */
             return 1;
         }
 
@@ -1650,7 +1611,7 @@ namespace WHA_avac
 
         public int pickDate(int threadNo)
         {
-
+            setLogT(threadNo, "pickDate..");
         verification1:
             ThreadStart starter = delegate { showVerificationCode(gHtml[threadNo], threadNo); };
             new Thread(starter).Start();
@@ -1663,13 +1624,14 @@ namespace WHA_avac
             string respHtml;
             while(true)
             {
-                setLogT(threadNo, "pickDate..");
+
+            pickDate:
                 lock (gDays)
                 {
                     if (gDays.Count == 0)
                     {
                         setLogT(threadNo, gVACity_raw + ", " + (gCategory.Equals("17") ? "working and holiday, " : "general") + ", 名额已满, 请尝试其它预约地点");
-                        return -1;
+                        return -5;
                     }
                     respHtml = weLoveYue(
                         threadNo,
@@ -1694,7 +1656,11 @@ namespace WHA_avac
                 if (myMatch.Success)
                 {
                     gEventvalidation[threadNo] = ToUrlEncode(myMatch.Groups[0].Value);
-
+                }
+                else
+                {
+                    setLogtRed(threadNo, "getting page failed, retry..");
+                    goto pickDate;
                 }
 
                 reg = @"(?<=id=""__VIEWSTATE"" value="").*?(?="" />)";
@@ -1702,7 +1668,11 @@ namespace WHA_avac
                 if (myMatch.Success)
                 {
                     gViewstate[threadNo] = ToUrlEncode(myMatch.Groups[0].Value);
-
+                }
+                else
+                {
+                    setLogtRed(threadNo, "getting page failed, retry..");
+                    goto pickDate;
                 }
 
                 if (respHtml.Contains("Please enter the correct verification code"))
@@ -1726,9 +1696,8 @@ namespace WHA_avac
                         else
                         {
                             setLogT(threadNo, gVACity_raw + ", " + (gCategory.Equals("17") ? "working and holiday, " : "general") + ", 名额已满, 请尝试其它预约地点");
-                            return -1;
+                            return -5;
                         }
-                        
                     }
                 }
                 return 1;
@@ -1747,7 +1716,7 @@ namespace WHA_avac
             {
                 Thread.Sleep(50);
             }
-
+            pickTime:
             string respHtml = weLoveYue(
                 threadNo,
                 "https://www.visaservices.in/DIAC-China-Appointment_new/AppScheduling/AppSchedulingInterviewDate.aspx",
@@ -1765,9 +1734,18 @@ namespace WHA_avac
             gVerificationCode[threadNo] = "";//不论输入得正确与否, 都需要清空
             gHtml[threadNo] = respHtml;
 
-            if (respHtml.Contains("Your appointment is Rescheduled")) //新邮箱的成功提示信息?
+            if (
+                respHtml.Contains("but there is some error in printing your appointment letter")
+                ||
+                respHtml.Contains("Your appointment is Rescheduled")
+                )
             {
+                setLogtRed(threadNo, "恭喜, 预约成功!");
                 printAppLetter(threadNo);
+            }
+            else if (respHtml.Contains("lblReference")) //直接显示出了预约信
+            {
+                printFromHtml(respHtml, threadNo);
             }
             else
             {
@@ -1783,7 +1761,6 @@ namespace WHA_avac
                 if (myMatch.Success)
                 {
                     gViewstate[threadNo] = ToUrlEncode(myMatch.Groups[0].Value);
-
                 }
 
 
@@ -1815,46 +1792,48 @@ namespace WHA_avac
 
         public void autoT(int threadNo)
         {
+            int result = -999;
 
-            if (apply1(threadNo) == -9)
+            result = apply1(threadNo);
+            if (result == -9)
+            {
+                return;
+            }
+            if (result == -1)
             {
                 return;
             }
 
-            apply2(threadNo);
+            result = apply2(threadNo);
+            if (result == -12)//Appointment Letter found
+            {
+                return;
+            }
+            if (result == -2)//invalid url
+            {
+                return;
+            }
+            if (result == -1 || result == -3) //-3 申请人已预约  -1  incompleted personal details
+            {
+                return;
+            }
+            if (result == -5) //名额已满
+            {
+                return;
+            }
 
-            if (pickDate(threadNo) == -1)
+            result = pickDate(threadNo);
+            if (result == -1)
+            {
+                return;
+            }
+            if (result == -5) //名额已满
             {
                 return;
             }
 
             pickTime(threadNo);
         }
-
-        public void autoT2(int threadNo)
-        {
-            gThreadNoOfVerificationCodeToBeEntered = -1;
-
-            int fillInResult = apply2(threadNo);
-
-            if (fillInResult == -2)//incorrect vervification code
-            {
-                return;
-            }
-            if (fillInResult == -1 || fillInResult == -3)
-            {
-                return;
-            }
-
-            if (pickDate(threadNo) == -1)
-            {
-                return;
-            }
-
-            pickTime(threadNo);
-            
-        }
-
 
         public void printAppLetter(int threadNo)
         {
@@ -1909,7 +1888,7 @@ namespace WHA_avac
                 goto exception;
             }
 
-            setLogT(threadNo, "passport and sur name verification... ");
+            setLogT(threadNo, "email and password verification... ");
         verification1:
             ThreadStart starter = delegate { showVerificationCode(respHtml, threadNo); };
             new Thread(starter).Start();
@@ -1962,6 +1941,11 @@ namespace WHA_avac
                 goto verification1;
             }
 
+            if (respHtml.Contains("Record with specified details does not exists"))
+            {
+                setLogT(threadNo, gEmail.Replace("%40", "@") + " 此邮箱下无预约记录");
+                return;
+            }
             string referenceNo = "";
             reg = @"(?<=ctl00_plhMain_rdbDocketList_0"">)(\s|\S)*?(?=<\/label>)";
             myMatch = (new Regex(reg)).Match(respHtml);
@@ -1971,18 +1955,10 @@ namespace WHA_avac
             }
             else
             {
-                goto exception;//此处加入no reference no的判断
+                goto exception;
             }
 
             setLogT(threadNo, "Select Reference Number... ");
-        verification2:
-            starter = delegate { showVerificationCode(respHtml, threadNo); };
-            new Thread(starter).Start();
-
-            while (gVerificationCode[threadNo] == null || gVerificationCode[threadNo] == "")
-            {
-                Thread.Sleep(50);
-            }
 
             respHtml = weLoveYue(
                 threadNo,
@@ -2019,11 +1995,6 @@ namespace WHA_avac
             else {
                 goto exception;
             }
-            if (respHtml.Contains("Please enter the correct verification code"))
-            {
-                setLogT(threadNo, "验证码错误！请重新输入");
-                goto verification2;
-            }
 
             setLogT(threadNo, "passport and sur name verification...");
         verification3:
@@ -2050,22 +2021,62 @@ namespace WHA_avac
                 );
             gTicket[threadNo]++;
             gVerificationCode[threadNo] = "";//不论输入得正确与否, 都需要清空
-
+            
             if (respHtml.Contains("Please enter the correct verification code"))
             {
+                reg = @"(?<=name=""__EVENTVALIDATION"" id=""__EVENTVALIDATION"" value="").*?(?="" />)";
+                myMatch = (new Regex(reg)).Match(respHtml);
+                if (myMatch.Success)
+                {
+                    gEventvalidation[threadNo] = ToUrlEncode(myMatch.Groups[0].Value);
+                }
+                else
+                {
+                    goto exception;
+                }
+
+                reg = @"(?<=id=""__VIEWSTATE"" value="").*?(?="" />)";
+                myMatch = (new Regex(reg)).Match(respHtml);
+                if (myMatch.Success)
+                {
+                    gViewstate[threadNo] = ToUrlEncode(myMatch.Groups[0].Value);
+                }
+                else
+                {
+                    goto exception;
+                }
                 setLogT(threadNo, "验证码错误！请重新输入");
                 goto verification3;
             }
+            if (respHtml.Contains("Record with specified details does not exist"))
+            {
+                setLogT(threadNo, "此护照号" + gPassport + " & 申请人姓" + gLastName + " 下无预约记录");
+                return;
+            }
+            if (printFromHtml(respHtml, threadNo) == 1)
+            {
+                return;
+            }
 
+            exception:
+                setLogtRed(threadNo, "网站异常, 打印预约信失败, 请稍后再试! 或者自行登录AVAC官网打印预约信");
+                setLogtRed(threadNo, "打印方式:");
+                setLogtRed(threadNo, "1. 访问这个地址 https://www.visaservices.in/DIAC-China-Appointment_new/AppScheduling/AppWelcome.aspx?p=sPcgcjykQzBJn3ZQhoWvHUCcn911JlTQwOXWcGhM4%2fE%3d  点击\"打印预约信\" ");
+                setLogtRed(threadNo, "2. 在电子邮件处输入" + gEmail.Replace("%40", "@") + ", 在密码处输入" + gPassword);
+                setLogtRed(threadNo, "3. 在下一个页面中, 填写您的护照号(passport number)和姓氏拼音(sur name), 确认号码不需要填写");
+        }
+
+        public int printFromHtml(string html, int threadNo)
+        {
             string lblReference = "";
             reg = @"(?<=<span id=""lblReference"">).*?(?=</span>)";
-            myMatch = (new Regex(reg)).Match(respHtml);
+            myMatch = (new Regex(reg)).Match(html);
             if (myMatch.Success)
             {
                 lblReference = myMatch.Groups[0].Value;
                 setLogT(threadNo, "预约号: " + lblReference + "\n确认信已下载到软件所在位置，请截图或拍照并请牢记预约号。");
-            
-                string result = respHtml
+
+                string result = html
                 .Replace("<head id=\"Head1\"><title>", "<head id=\"Head1\"><meta charset=\"UTF-8\"><title>")
                 .Replace("../", "https://www.visaservices.in/DIAC-China-Appointment_new/")
                 .Replace("Print Appointment Letter", "打印预约信")
@@ -2099,20 +2110,13 @@ namespace WHA_avac
                 .Replace("No. 213 Middle Sichuan Rd., Huangpu District, 上海, 200002, China ", "邮编200002. ")
                 .Replace("Room C,D,E,F,G,H,I, 21st Floor", "中国北京东城区东直门外大街")
                 .Replace("Oriental Kenzo Plaza, No.48 Dongzhimenwai Street Dongcheng District, 北京 , P.R. China 100027", "48号东方银座写字楼21层D-I室 邮编：100027 ");
-                
+
                 downloadHtml(result);
-                return;
             }
-
-
-            exception:
-                setLogtRed(threadNo, "网站异常, 打印预约信失败, 请稍后再试! 或者自行登录AVAC官网打印预约信");
-                setLogtRed(threadNo, "打印方式:");
-                setLogtRed(threadNo, "1. 访问这个地址 https://www.visaservices.in/DIAC-China-Appointment_new/AppScheduling/AppWelcome.aspx?p=sPcgcjykQzBJn3ZQhoWvHUCcn911JlTQwOXWcGhM4%2fE%3d  点击\"打印预约信\" ");
-                setLogtRed(threadNo, "2. 在电子邮件处输入" + gEmail.Replace("%40", "@") + ", 在密码处输入" + gPassword);
-                setLogtRed(threadNo, "3. 在下一个页面中, 填写您的护照号(passport number)和姓氏拼音(sur name), 确认号码不需要填写");
+            else
+                return -1;
+            return 1;
         }
-
 
         private void loginB_Click(object sender, EventArgs e)
         {
@@ -2153,6 +2157,17 @@ namespace WHA_avac
                 e.Handled = true;
             }
         }
+
+        private void rate_change(object sender, EventArgs e)
+        {
+            if (Int32.Parse(rate.Text) > 20000)
+            {
+                timeoutTime = Int32.Parse(rate.Text);
+
+                setLogT(0, "set timeout time " + timeoutTime + "ms");
+            }
+        }
+
         private void logT_TextChanged(object sender, EventArgs e)
         {
             logT.SelectionStart = logT.Text.Length;
@@ -2162,93 +2177,12 @@ namespace WHA_avac
         public delegate void delegate2();
 
 
-        /*
-        public void addURL()
-        {
-            //string P = @"^http(s)?:\/\/([\w-]+\.)+[\w-]+$";//无法匹配下级页面
-            string P = @"^(https?|ftp|file)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]";
-            Match M = (new Regex(P)).Match(inputT.Text);
-            if (M.Success)
-            {
-            }else{
-                MessageBox.Show("invalid url!");
-                return;
-            }            
-            if (urlList.InvokeRequired)
-            {
-                delegate2 sl = new delegate2(delegate()
-                {
-                    urlList.Items.Add(inputT.Text);
-                    inputT.Text = "";
-                });
-                urlList.Invoke(sl);
-            }
-            else
-            {
-                urlList.Items.Add(inputT.Text);
-                inputT.Text = "";
-            }
-            string strCollected = string.Empty;
-            for (int i = 0; i < urlList.Items.Count; i++)
-            {
-                if (strCollected == string.Empty)
-                {
-                    strCollected = urlList.GetItemText(urlList.Items[i]);
-                }
-                else
-                {
-                    strCollected += "\n" + urlList.GetItemText(urlList.Items[i]) ;
-                }
-            }
-            writeFile(System.Environment.CurrentDirectory + "\\" + "urlList", strCollected);
-        }
-
-       
-        public void deleteURL()
-        {
-            if (urlList.InvokeRequired)
-            {
-                delegate2 sl = new delegate2(delegate()
-                {
-                    for (int i = urlList.CheckedItems.Count - 1; i >= 0; i--)
-                    {
-                        urlList.Items.Remove(urlList.CheckedItems[i]);
-                    }
-                });
-                urlList.Invoke(sl);
-            }
-            else
-            {
-                for (int i = urlList.CheckedItems.Count - 1; i >= 0; i--)
-                {
-                    urlList.Items.Remove(urlList.CheckedItems[i]);
-                }
-            }
-            string strCollected = string.Empty;
-            for (int i = 0; i < urlList.Items.Count; i++)
-            {
-                if (strCollected == string.Empty)
-                {
-                    strCollected = urlList.GetItemText(urlList.Items[i]);
-                }
-                else
-                {
-                    strCollected += "\n" + urlList.GetItemText(urlList.Items[i]);
-                }
-            }
-            writeFile(System.Environment.CurrentDirectory + "\\" + "urlList", strCollected);
-        }
-        */
         private void addB_Click(object sender, EventArgs e)
         {
-       //     Thread t = new Thread(addURL);
-       //     t.Start();
         }
 
         private void deleteB_Click(object sender, EventArgs e)
         {
-       //     Thread t = new Thread(deleteURL);
-       //     t.Start();
         }
 
         public void showVerificationCode(string respHtml, int threadNo)

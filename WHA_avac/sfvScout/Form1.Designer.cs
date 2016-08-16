@@ -82,27 +82,28 @@
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(20, 29);
+            this.label1.Location = new System.Drawing.Point(16, 29);
             this.label1.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(37, 17);
+            this.label1.Size = new System.Drawing.Size(58, 17);
             this.label1.TabIndex = 3;
-            this.label1.Text = "rate:";
+            this.label1.Text = "tiemout:";
             // 
             // rate
             // 
-            this.rate.Location = new System.Drawing.Point(68, 20);
+            this.rate.Location = new System.Drawing.Point(71, 27);
             this.rate.Margin = new System.Windows.Forms.Padding(4);
             this.rate.Name = "rate";
-            this.rate.Size = new System.Drawing.Size(41, 22);
+            this.rate.Size = new System.Drawing.Size(56, 22);
             this.rate.TabIndex = 4;
             this.rate.Text = "500";
+            this.rate.TextChanged += new System.EventHandler(this.rate_change);
             this.rate.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.rate_KeyPress);
             // 
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(111, 29);
+            this.label2.Location = new System.Drawing.Point(133, 29);
             this.label2.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(26, 17);
@@ -279,7 +280,7 @@
             this.comboBox1.Items.AddRange(new object[] {
             "Work and Holiday",
             "General"});
-            this.comboBox1.Location = new System.Drawing.Point(194, 24);
+            this.comboBox1.Location = new System.Drawing.Point(209, 24);
             this.comboBox1.Margin = new System.Windows.Forms.Padding(4);
             this.comboBox1.Name = "comboBox1";
             this.comboBox1.Size = new System.Drawing.Size(148, 24);
@@ -289,7 +290,7 @@
             // label8
             // 
             this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(147, 29);
+            this.label8.Location = new System.Drawing.Point(162, 29);
             this.label8.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label8.Name = "label8";
             this.label8.Size = new System.Drawing.Size(39, 17);
@@ -299,7 +300,7 @@
             // label9
             // 
             this.label9.AutoSize = true;
-            this.label9.Location = new System.Drawing.Point(364, 29);
+            this.label9.Location = new System.Drawing.Point(370, 29);
             this.label9.Name = "label9";
             this.label9.Size = new System.Drawing.Size(43, 17);
             this.label9.TabIndex = 26;
@@ -311,7 +312,7 @@
             this.comboBox2.Items.AddRange(new object[] {
             "快速",
             "安全"});
-            this.comboBox2.Location = new System.Drawing.Point(414, 24);
+            this.comboBox2.Location = new System.Drawing.Point(420, 24);
             this.comboBox2.Margin = new System.Windows.Forms.Padding(4);
             this.comboBox2.Name = "comboBox2";
             this.comboBox2.Size = new System.Drawing.Size(101, 24);
