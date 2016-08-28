@@ -131,6 +131,10 @@ namespace WHA_avac
 
             while (true)
             {
+                if (Form1.gForceToStop)
+                {
+                    return "";
+                }
                 // get unread mails
                 string html = form1.weLoveYue(
                     threadNo,

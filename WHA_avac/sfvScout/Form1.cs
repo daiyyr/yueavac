@@ -18,10 +18,17 @@ namespace WHA_avac
     {
 
         /*
-         * if the it is true, you can choose working holiday apply or general apply
-         * if the it is false, you can only choose working holiday apply 
+         * if the it is false, you can choose working holiday apply or general apply
+         * if the it is true, you can only choose working holiday apply 
          */
-        bool debug = true;
+        bool clientRelease = false;
+
+
+
+        /*
+         * control the test button and test log 
+         */
+        bool debug = false;
 
 
         /*
@@ -32,7 +39,7 @@ namespace WHA_avac
 
         public static int timeoutTime = 60000;
         public const int retry = 5;
-
+        public static bool gForceToStop = false;
         
         string reg = "";
         Match myMatch;
@@ -67,7 +74,7 @@ namespace WHA_avac
                gVACity = "",
                gCategory = "from combobox";          //13 for general, 17 for work and holiday;
 
-
+        #region client info
         /*
         //淘寶訂單號： 956505835532653
         //qq號   379318693
@@ -579,7 +586,7 @@ namespace WHA_avac
 
 
 
-
+        #endregion
 
 
 
@@ -632,14 +639,17 @@ namespace WHA_avac
             if (debug)
             {
                 this.ClientSize = new System.Drawing.Size(950, 600);
-                comboBox1.SelectedIndex = 1; //normal
                 button2.Visible = true;
                 testLog.Visible = true;
             }
-            else
+            if (clientRelease)
             {
                 comboBox1.SelectedIndex = 0; //work and holiday 
                 comboBox1.Items.RemoveAt(1);
+            }
+            else
+            {
+                comboBox1.SelectedIndex = 1; //normal
             }
 
             gCategory = comboBox1.SelectedIndex == 0 ? "17" : "13";    //13 for general, 17 for work and holiday
@@ -670,6 +680,8 @@ namespace WHA_avac
                 }
             }
         }
+
+        #region tools
 
         public delegate void setLog(int threadNo, string str1);
         public void setLogT(int threadNo, string s)
@@ -741,15 +753,6 @@ namespace WHA_avac
             }
         }
 
-      
-        /*
-        public void alarm()
-        {
-            System.Media.SoundPlayer player = new System.Media.SoundPlayer(WHA_avac.Properties.Resources.mtl);
-            player.Load();
-            player.PlayLooping();
-        }
-         */
         public static string ToUrlEncode(string strCode)
         {
             StringBuilder sb = new StringBuilder();
@@ -839,7 +842,7 @@ namespace WHA_avac
             }
             catch (WebException webEx)
             {
-                setLogT(threadNo,"GetRequestStream," + webEx.Status.ToString());
+                setLogT(threadNo, "While writing post data," + webEx.Status.ToString());
                 return -1;
             }
             
@@ -943,8 +946,12 @@ namespace WHA_avac
          */
         public int weLoveMuYue(int threadNo, string url, string method, string referer, bool allowAutoRedirect, string postData)
         {
-            while (true)
+            for (int i = 0; i < retry; i++)
             {
+                if (gForceToStop)
+                {
+                    break;
+                }
                 HttpWebRequest req = (HttpWebRequest)WebRequest.Create(url);
                 HttpWebResponse resp = null;
                 setRequest(req, threadNo);
@@ -984,7 +991,10 @@ namespace WHA_avac
                 {
                     continue;
                 }
-                setTestLog(req, respHtml);
+                if (debug)
+                {
+                    setTestLog(req, respHtml);
+                }
                 gCookieContainer[threadNo] = req.CookieContainer.GetCookies(req.RequestUri);
                 resp.Close();
                 break;
@@ -997,8 +1007,12 @@ namespace WHA_avac
          */
         public string weLoveYue(int threadNo, string url, string method, string referer, bool allowAutoRedirect, string postData)
         {
-            while (true)
+            for (int i = 0; i < retry; i++)
             {
+                if (gForceToStop)
+                {
+                    break;
+                }
                 HttpWebRequest req = (HttpWebRequest)WebRequest.Create(url);
                 HttpWebResponse resp = null;
                 setRequest(req, threadNo);
@@ -1046,6 +1060,7 @@ namespace WHA_avac
                     continue;
                 }
             }
+            return "";
         }
 
         /* 
@@ -1056,12 +1071,10 @@ namespace WHA_avac
         {
             for (int i = 0; i < retry; i++)
             {
-                /*
                 if (gForceToStop)
                 {
                     break;
                 }
-                */ 
                 HttpWebRequest req = (HttpWebRequest)WebRequest.Create(url);
                 HttpWebResponse resp = null;
                 setRequest(req, threadNo);
@@ -1133,8 +1146,12 @@ namespace WHA_avac
          */
         public HttpWebResponse weLoveYueer(int threadNo, HttpWebResponse resp, string url, string method, string referer, bool allowAutoRedirect, string postData)
         {
-            while (true)
+            for (int i = 0; i < retry; i++)
             {
+                if (gForceToStop)
+                {
+                    break;
+                }
                 HttpWebRequest req = (HttpWebRequest)WebRequest.Create(url);
                 setRequest(req, threadNo);
                 req.Method = method;
@@ -1170,9 +1187,56 @@ namespace WHA_avac
                     continue;
                 }
             }
+            return null;
         }
 
 
+        public void showVerificationCode(string respHtml, int threadNo)
+        {
+            string cCodeGuid = "";
+            reg = @"(?<=MyCaptchaImage.aspx\?guid=).*?(?="" border=)";
+            myMatch = (new Regex(reg)).Match(respHtml);
+            if (myMatch.Success)
+            {
+                cCodeGuid = myMatch.Groups[0].Value;
+            }
+            lock (pictureBox1)
+            {
+                while (gThreadNoOfVerificationCodeToBeEntered != -1)
+                {
+                    Thread.Sleep(50);
+                }
+                gThreadNoOfVerificationCodeToBeEntered = threadNo;
+                if (textBox1.InvokeRequired)
+                {
+                    delegate2 sl = new delegate2(delegate()
+                    {
+                        pictureBox1.ImageLocation = @"https://www.visaservices.in/DIAC-China-Appointment_new/AppScheduling/MyCaptchaImage.aspx?guid=" + cCodeGuid;
+                        pictureBox1.Refresh();
+                        pictureBox1.Visible = true;
+                        textBox1.Text = "";
+                        textBox1.ReadOnly = false;
+                        textBox1.Focus();
+                        label6.Text = "线程" + threadNo.ToString() + ":请输入验证码";
+                        label6.Visible = true;
+                    });
+                    textBox1.Invoke(sl);
+                }
+                else
+                {
+                    pictureBox1.ImageLocation = @"https://www.visaservices.in/DIAC-China-Appointment_new/AppScheduling/MyCaptchaImage.aspx?guid=" + cCodeGuid;
+                    pictureBox1.Refresh();
+                    pictureBox1.Visible = true;
+                    textBox1.Text = "";
+                    textBox1.ReadOnly = false;
+                    textBox1.Focus();
+                    label6.Text = "线程" + threadNo.ToString() + ":请输入验证码";
+                    label6.Visible = true;
+                }
+            }
+        }
+
+        #endregion
 
         public int apply1(int threadNo) 
         {
@@ -1199,6 +1263,10 @@ namespace WHA_avac
             }
             else
             {
+                if (gForceToStop)
+                {
+                    return -4;
+                }
                 setLogtRed(threadNo, "getting page failed, retry..");
                 goto firstpage;
             }
@@ -1211,6 +1279,10 @@ namespace WHA_avac
             }
             else
             {
+                if (gForceToStop)
+                {
+                    return -4;
+                }
                 setLogtRed(threadNo, "getting page failed, retry..");
                 goto firstpage;
             }
@@ -1222,7 +1294,7 @@ namespace WHA_avac
                 "https://www.visaservices.in/DIAC-China-Appointment_new/AppScheduling/AppWelcome.aspx?p=Gta39GFZnstZVCxNVy83zTlkvzrXE95fkjmft28XjNg%3d",
                 "POST",
                 "https://www.visaservices.in/DIAC-China-Appointment_new/AppScheduling/AppWelcome.aspx?p=Gta39GFZnstZVCxNVy83zTlkvzrXE95fkjmft28XjNg%3d",
-                false,
+                true,
                 "__EVENTTARGET=ctl00%24plhMain%24lnkSchApp&__EVENTARGUMENT=&__VIEWSTATE=" + gViewstate[threadNo]
                 + "&____Ticket=" + gTicket[threadNo].ToString()
                 + "&__EVENTVALIDATION=" + gEventvalidation[threadNo]
@@ -1237,6 +1309,10 @@ namespace WHA_avac
             }
             else
             {
+                if (gForceToStop)
+                {
+                    return -4;
+                }
                 setLogtRed(threadNo, "getting page failed, retry..");
                 goto makeapointment;
             }
@@ -1248,6 +1324,10 @@ namespace WHA_avac
             }
             else
             {
+                if (gForceToStop)
+                {
+                    return -4;
+                }
                 setLogtRed(threadNo, "getting page failed, retry..");
                 goto makeapointment;
             }
@@ -1269,7 +1349,7 @@ namespace WHA_avac
                 "https://www.visaservices.in/DIAC-China-Appointment_new/AppScheduling/AppScheduling.aspx",
                 "POST",
                 "https://www.visaservices.in/DIAC-China-Appointment_new/AppScheduling/AppWelcome.aspx?p=Gta39GFZnstZVCxNVy83zTlkvzrXE95fkjmft28XjNg%3d",
-                false,
+                true,
                 "__VIEWSTATE="+gViewstate[threadNo]
                 + "&ctl00%24plhMain%24cboVAC=" + gVACity
                 + "&ctl00%24plhMain%24btnSubmit=%E6%8F%90%E4%BA%A4&ctl00%24plhMain%24hdnValidation1"
@@ -1289,6 +1369,10 @@ namespace WHA_avac
             }
             else
             {
+                if (gForceToStop)
+                {
+                    return -4;
+                }
                 setLogtRed(threadNo, "getting page failed, retry..");
                 goto selectingLocation;
             }
@@ -1301,11 +1385,19 @@ namespace WHA_avac
             }
             else
             {
+                if (gForceToStop)
+                {
+                    return -4;
+                }
                 setLogtRed(threadNo, "getting page failed, retry..");
                 goto selectingLocation;
             }
             if (respHtml.Contains("Please enter the correct verification code"))
             {
+                if (gForceToStop)
+                {
+                    return -4;
+                }
                 setLogT(threadNo, "验证码错误！请重新输入");
                 goto verification1;
             }
@@ -1322,7 +1414,7 @@ namespace WHA_avac
                 "https://www.visaservices.in/DIAC-China-Appointment_new/AppScheduling/AppSchedulingGetInfo.aspx",
                 "POST",
                 "https://www.visaservices.in/DIAC-China-Appointment_new/AppScheduling/AppSchedulingGetInfo.aspx",
-                false,
+                true,
                 "__EVENTTARGET=&__EVENTARGUMENT=&__LASTFOCUS=&__VIEWSTATE=" + gViewstate[threadNo]
                 +"&ctl00%24plhMain%24tbxNumOfApplicants"
                 +"=1&ctl00%24plhMain%24cboVisaCategory=" + gCategory //13 for general, 17 for working and holiday
@@ -1350,6 +1442,10 @@ namespace WHA_avac
             }
             else
             {
+                if (gForceToStop)
+                {
+                    return -4;
+                }
                 setLogtRed(threadNo, "getting page failed, retry..");
                 goto visatype;
             }
@@ -1362,6 +1458,10 @@ namespace WHA_avac
             }
             else
             {
+                if (gForceToStop)
+                {
+                    return -4;
+                }
                 setLogtRed(threadNo, "getting page failed, retry..");
                 goto visatype;
             }
@@ -1376,7 +1476,7 @@ namespace WHA_avac
             {
                 Thread.Sleep(50);
             }
-            
+            emailaddress:
             respHtml = weLoveYue(
                 threadNo,
                 "https://www.visaservices.in/DIAC-China-Appointment_new/AppScheduling/EmailRegistration.aspx",
@@ -1397,6 +1497,15 @@ namespace WHA_avac
                 );
             gTicket[threadNo]++;
             gVerificationCode[threadNo] = "";//不论输入得正确与否, 都需要清空
+            if (respHtml == "" || String.IsNullOrEmpty(respHtml)) //由于网络原因请求失败
+            {
+                if (gForceToStop)
+                {
+                    return -4;
+                }
+                setLogtRed(threadNo, "getting page failed, retry..");
+                goto emailaddress;
+            }
 
             if (respHtml.Contains("Please enter the correct verification code"))
             {
@@ -1416,6 +1525,10 @@ namespace WHA_avac
                 {
                     gViewstate[threadNo] = ToUrlEncode(myMatch.Groups[0].Value);
                 }
+                if (gForceToStop)
+                {
+                    return -4;
+                }
                 goto verification3;
             }
             else if (respHtml.Contains("请登录您的注册邮箱打开该网址"))
@@ -1427,7 +1540,7 @@ namespace WHA_avac
             }
             else
             {
-                setLogT(threadNo, "未收到邮件送出回执, 仍然尝试接收邮件, 同时请再开软件继续申请");
+                setLogtRed(threadNo, "未收到邮件送出回执, 仍然尝试接收邮件, 同时请再开软件继续申请");
                 Thread.Sleep(3000);
                 Mail163 myMail = new Mail163(threadNo, gEmail, emailPassword, this);
                 urlForStep2[threadNo] = myMail.queery("Appointment Registration URL", @"https://www\.visaservices(\s|\S)+?(?=</a>)");
@@ -1480,6 +1593,10 @@ namespace WHA_avac
             }
             else
             {
+                if (gForceToStop)
+                {
+                    return -4;
+                }
                 setLogtRed(threadNo, "getting page failed, retry..");
                 goto gettingstep2page;
             }
@@ -1492,6 +1609,10 @@ namespace WHA_avac
             }
             else
             {
+                if (gForceToStop)
+                {
+                    return -4;
+                }
                 setLogtRed(threadNo, "getting page failed, retry..");
                 goto gettingstep2page;
             }
@@ -1512,7 +1633,7 @@ namespace WHA_avac
                 "https://www.visaservices.in/DIAC-China-Appointment_new/AppScheduling/AppSchedulingVisaCategory.aspx?p="+p,
                 "POST",
                 urlForStep2[threadNo],
-                false,
+                true,
                 "__VIEWSTATE=" + gViewstate[threadNo]
                 + "&ctl00%24plhMain%24repAppVisaDetails%24ctl01%24tbxPassportNo="
                 + gPassport
@@ -1554,6 +1675,10 @@ namespace WHA_avac
             }
             else
             {
+                if (gForceToStop)
+                {
+                    return -4;
+                }
                 setLogtRed(threadNo, "getting page failed, retry..");
                 goto details;
             }
@@ -1566,12 +1691,20 @@ namespace WHA_avac
             }
             else
             {
+                if (gForceToStop)
+                {
+                    return -4;
+                }
                 setLogtRed(threadNo, "getting page failed, retry..");
                 goto details;
             }
 
             if (respHtml.Contains("Please enter the correct verification code") || respHtml.Contains("Please enter the correct CAPTCHA alphabets"))
             {
+                if (gForceToStop)
+                {
+                    return -4;
+                }
                 setLogT(threadNo, "验证码错误！请重新输入");
                 goto verification1;
             }
@@ -1638,7 +1771,7 @@ namespace WHA_avac
                         "https://www.visaservices.in/DIAC-China-Appointment_new/AppScheduling/AppSchedulingInterviewDate.aspx",
                         "POST",
                         "https://www.visaservices.in/DIAC-China-Appointment_new/AppScheduling/AppSchedulingVisaCategory.aspx",
-                        false,
+                        true,
                         "__EVENTTARGET=ctl00%24plhMain%24cldAppointment&__EVENTARGUMENT="
                         + gDays.Last()
                         + "&__VIEWSTATE=" + gViewstate[threadNo]
@@ -1659,6 +1792,10 @@ namespace WHA_avac
                 }
                 else
                 {
+                    if (gForceToStop)
+                    {
+                        return -4;
+                    }
                     setLogtRed(threadNo, "getting page failed, retry..");
                     goto pickDate;
                 }
@@ -1671,12 +1808,20 @@ namespace WHA_avac
                 }
                 else
                 {
+                    if (gForceToStop)
+                    {
+                        return -4;
+                    }
                     setLogtRed(threadNo, "getting page failed, retry..");
                     goto pickDate;
                 }
 
                 if (respHtml.Contains("Please enter the correct verification code"))
                 {
+                    if (gForceToStop)
+                    {
+                        return -4;
+                    }
                     setLogT(threadNo, "验证码错误！请重新输入");
                     goto verification1;
                 }
@@ -1722,7 +1867,7 @@ namespace WHA_avac
                 "https://www.visaservices.in/DIAC-China-Appointment_new/AppScheduling/AppSchedulingInterviewDate.aspx",
                 "POST",
                 "https://www.visaservices.in/DIAC-China-Appointment_new/AppScheduling/AppSchedulingInterviewDate.aspx",
-                false,
+                true,
                 "__EVENTTARGET=ctl00%24plhMain%24gvSlot%24ctl" + gTime
                 + "%24lnkTimeSlot&__EVENTARGUMENT="
                 + "&__VIEWSTATE=" + gViewstate[threadNo]
@@ -1733,6 +1878,16 @@ namespace WHA_avac
             gTicket[threadNo]++;
             gVerificationCode[threadNo] = "";//不论输入得正确与否, 都需要清空
             gHtml[threadNo] = respHtml;
+
+            if (respHtml == "" || String.IsNullOrEmpty(respHtml)) //由于网络原因请求失败
+            {
+                if (gForceToStop)
+                {
+                    return -4;
+                }
+                setLogtRed(threadNo, "getting page failed, retry..");
+                goto pickTime;
+            }
 
             if (
                 respHtml.Contains("but there is some error in printing your appointment letter")
@@ -1766,6 +1921,10 @@ namespace WHA_avac
 
                 if (respHtml.Contains("Please enter the correct verification code"))
                 {
+                    if (gForceToStop)
+                    {
+                        return -4;
+                    }
                     setLogT(threadNo, "验证码错误！请重新输入");
                     goto verification1;
                 }
@@ -1795,7 +1954,11 @@ namespace WHA_avac
             int result = -999;
 
             result = apply1(threadNo);
-            if (result == -9)
+            if (result == -9) //no available place
+            {
+                return;
+            }
+            if (result == -4) //用户终止请求
             {
                 return;
             }
@@ -1821,9 +1984,17 @@ namespace WHA_avac
             {
                 return;
             }
+            if (result == -4) //用户终止请求
+            {
+                return;
+            }
 
             result = pickDate(threadNo);
             if (result == -1)
+            {
+                return;
+            }
+            if (result == -4) //用户终止请求
             {
                 return;
             }
@@ -1853,7 +2024,7 @@ namespace WHA_avac
                 "https://www.visaservices.in/DIAC-China-Appointment_new/AppScheduling/AppWelcome.aspx?p=sPcgcjykQzBJn3ZQhoWvHUCcn911JlTQwOXWcGhM4%2fE%3d",
                 "POST",
                 "https://www.visaservices.in/DIAC-China-Appointment_new/AppScheduling/AppWelcome.aspx?p=sPcgcjykQzBJn3ZQhoWvHUCcn911JlTQwOXWcGhM4%2fE%3d",
-                false,
+                true,
                 "__EVENTTARGET=ctl00%24plhMain%24lnkPrintApp"
                 + "&__EVENTARGUMENT="
                 + "&__VIEWSTATE=" + gViewstate[threadNo]
@@ -1903,7 +2074,7 @@ namespace WHA_avac
                 "https://www.visaservices.in/DIAC-China-Appointment_new/AppScheduling/EmailRegistration.aspx?p=sPcgcjykQzBJn3ZQhoWvHUCcn911JlTQwOXWcGhM4%2fE%3d",
                 "POST",
                 "https://www.visaservices.in/DIAC-China-Appointment_new/AppScheduling/AppWelcome.aspx?p=sPcgcjykQzBJn3ZQhoWvHUCcn911JlTQwOXWcGhM4%2fE%3d",
-                false,
+                true,
                 "__VIEWSTATE=" + gViewstate[threadNo]
                 + "&ctl00%24plhMain%24ImageButton1=Submit&____Ticket=" + gTicket[threadNo].ToString()
                 + "&__EVENTVALIDATION=" + gEventvalidation[threadNo]
@@ -1965,7 +2136,7 @@ namespace WHA_avac
                 "https://www.visaservices.in/DIAC-China-Appointment_new/AppScheduling/EmailRegistration.aspx?p=sPcgcjykQzBJn3ZQhoWvHUCcn911JlTQwOXWcGhM4%2fE%3d",
                 "POST",
                 "https://www.visaservices.in/DIAC-China-Appointment_new/AppScheduling/EmailRegistration.aspx?p=sPcgcjykQzBJn3ZQhoWvHUCcn911JlTQwOXWcGhM4%2fE%3d",
-                false,
+                true,
                 "__VIEWSTATE=" + gViewstate[threadNo]
                 + "&ctl00%24plhMain%24btnSubmit=Submit&____Ticket=" + gTicket[threadNo].ToString()
                 + "&__EVENTVALIDATION=" + gEventvalidation[threadNo]
@@ -2011,7 +2182,7 @@ namespace WHA_avac
                 "https://www.visaservices.in/DIAC-China-Appointment_new/AppScheduling/PrintAppLetter.aspx",
                 "POST",
                 "https://www.visaservices.in/DIAC-China-Appointment_new/AppScheduling/EmailRegistration.aspx?p=sPcgcjykQzBJn3ZQhoWvHUCcn911JlTQwOXWcGhM4%2fE%3d",
-                false,
+                true,
                 "__VIEWSTATE=" + gViewstate[threadNo]
                 + "&ctl00%24plhMain%24btnSubmit=Submit&____Ticket=" + gTicket[threadNo].ToString()
                 + "&__EVENTVALIDATION=" + gEventvalidation[threadNo]
@@ -2126,6 +2297,7 @@ namespace WHA_avac
 
         private void autoB_Click(object sender, EventArgs e)
         {
+            gForceToStop = false;
             lock (autoB)
             {
                 gThreadNo++;
@@ -2185,50 +2357,6 @@ namespace WHA_avac
         {
         }
 
-        public void showVerificationCode(string respHtml, int threadNo)
-        {
-            string cCodeGuid = "";
-            reg = @"(?<=MyCaptchaImage.aspx\?guid=).*?(?="" border=)";
-            myMatch = (new Regex(reg)).Match(respHtml);
-            if (myMatch.Success)
-            {
-                cCodeGuid = myMatch.Groups[0].Value;
-            }
-            lock (pictureBox1)
-            {
-                while (gThreadNoOfVerificationCodeToBeEntered != -1)
-                {
-                    Thread.Sleep(50);
-                }
-                gThreadNoOfVerificationCodeToBeEntered = threadNo;
-                if (textBox1.InvokeRequired)
-                {
-                    delegate2 sl = new delegate2(delegate()
-                    {
-                        pictureBox1.ImageLocation = @"https://www.visaservices.in/DIAC-China-Appointment_new/AppScheduling/MyCaptchaImage.aspx?guid=" + cCodeGuid;
-                        pictureBox1.Refresh();
-                        pictureBox1.Visible = true;
-                        textBox1.Text = "";
-                        textBox1.ReadOnly = false;
-                        textBox1.Focus();
-                        label6.Text = "线程" + threadNo.ToString() + ":请输入验证码";
-                        label6.Visible = true;
-                    });
-                    textBox1.Invoke(sl);
-                }
-                else
-                {
-                    pictureBox1.ImageLocation = @"https://www.visaservices.in/DIAC-China-Appointment_new/AppScheduling/MyCaptchaImage.aspx?guid=" + cCodeGuid;
-                    pictureBox1.Refresh();
-                    pictureBox1.Visible = true;
-                    textBox1.Text = "";
-                    textBox1.ReadOnly = false;
-                    textBox1.Focus();
-                    label6.Text = "线程" + threadNo.ToString() + ":请输入验证码";
-                    label6.Visible = true;
-                }
-            }
-        }
         
         private void textBox1_TextChanged(object sender, EventArgs e)
         {
@@ -2304,7 +2432,32 @@ namespace WHA_avac
         //for test
         private void button2_Click(object sender, EventArgs e)
         {
+            gForceToStop = false;
 
+            Thread thread1111 = new System.Threading.Thread(
+                delegate()
+              {
+
+                //test the email exception
+                gThreadNo++;
+                gViewstate.Add("");
+                gEventvalidation.Add("");
+                gVerificationCode.Add("");
+                gCookieContainer.Add(null);
+                gTicket.Add(1);
+                urlForStep2.Add("");
+                gHtml.Add("");
+
+                Mail163 myMail = new Mail163(0, gEmail, emailPassword, this);
+                urlForStep2[gThreadNo] = myMail.queery("Appointment Registration URL", @"https://www\.visaservices(\s|\S)+?(?=</a>)");
+                setLogT(-1, urlForStep2[gThreadNo]);
+                apply2(gThreadNo);
+                //test the email exception end
+
+              });
+            thread1111.Start();
+
+            /*
             //testWetherThreadUseUnicValue
             ThreadStart starter = delegate { tB(); };
             new Thread(starter).Start();
@@ -2347,6 +2500,7 @@ namespace WHA_avac
             gDays.Add("3 data");
             setLogT(-1,gDays.Last());
             setLogT(-1,gDays[0]);
+            */
         }
 
         private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
@@ -2373,13 +2527,14 @@ namespace WHA_avac
             ThreadStart starter = delegate { printAppLetter(gThreadNo); };
             new Thread(starter).Start();
         }
+
+        private void button4_Click(object sender, EventArgs e)
+        {
+            gForceToStop = true;
+            setLogtRed(-1, "user operation: stop running");
+        }
     }
 }
 
-//选择类别时，是否不需要提交两次: 是，不需要.
-//直接post a inavailable date, could succeed?  不可以
-//不需要访问第一页？  如果不get首页，最终将返回英文预约页，且英文预约者在中文页重新申请，仍显示名额满；所以可跳过首页的GET和POST , 替换预约页
-//多线程处理多次点击
-
-//自动识别验证码
-//如果出现两个月的日期，能不翻页直接提交第二个月的最晚时间？
+//服务器认为同一个用户频繁请求（post参数viewstate Eventvalidation ticket），会发回一个自动跳转，此时验证码图片的生成会延迟，所以可能看不到验证码
+//检查所有“是否允许自动跳转”，倾向于选是，否则可能受到“found”？检查这个逻辑
